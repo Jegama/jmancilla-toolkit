@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+
+        #qr-code {
+            margin-top: 2rem;
+            max-width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>QR Code Generator</h1>
+    <form id="qr-form">
+        <label for="text">Enter text:</label>
+        <input type="text" id="text" name="text" required>
+        <button type="submit">Generate QR Code</button>
+    </form>
+    <img id="qr-code" src="" alt="Generated QR code" style="display:none;">
+    <script>
+        document.getElementById('qr-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = document.getElementById('text').value;
+            const response = await fetch('/generate_qr_web', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text })
+            });
+            const data = await response.json();
+
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            generateQRCode(data.text);
+        });
+
+        function generateQRCode(text) {
+            const qrCodeElement = document.getElementById('qr-code');
+            qrCodeElement.style.display = "none";
+
+            QRCode.toDataURL(text, { width: 256, height: 256 }, function (err, url) {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                qrCodeElement.src = url;
+                qrCodeElement.style.display = "block";
+            });
+        }
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+</body>
+
+</html>
