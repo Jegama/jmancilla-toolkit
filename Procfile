@@ -1,0 +1,1 @@
+web: gunicorn qr_code_api:app
