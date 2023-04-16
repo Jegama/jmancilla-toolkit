@@ -72,8 +72,8 @@ def representative():
     # Log the received question
     log_question(text)
 
-    response = personal_index.query(text, response_mode="tree_summarize")
-
+    response = personal_index.query(text)
+    
     return jsonify({'text': response.response})
 
 def log_question(question):
