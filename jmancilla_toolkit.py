@@ -25,9 +25,9 @@ if app.config['OPENAI_API_KEY'] is None:
 else:
     print("OPENAI_API_KEY loaded successfully.")
 
-from llama_index.indices.keyword_table import GPTKeywordTableIndex
+from llama_index import GPTSimpleVectorIndex
 
-personal_index = GPTKeywordTableIndex.load_from_disk('index.json')
+personal_index = GPTSimpleVectorIndex.load_from_disk('index.json')
 
 @app.route('/')
 def index():
@@ -72,7 +72,7 @@ def representative():
     # Log the received question
     log_question(text)
 
-    response = personal_index.query(text)
+    response = personal_index.query(text, response_mode="tree_summarize")
 
     return jsonify({'text': response.response})
 

@@ -1,21 +1,15 @@
-from llama_index import (
-    SimpleDirectoryReader,
-    LLMPredictor,
-    ServiceContext
-)
-from llama_index.indices.keyword_table import GPTKeywordTableIndex
-from langchain.chat_models import ChatOpenAI
+from llama_index import SimpleDirectoryReader, GPTSimpleVectorIndex
+from llama_index.node_parser import SimpleNodeParser
 
 from dotenv import load_dotenv
 load_dotenv()
 
 documents = SimpleDirectoryReader('data').load_data()
 
-# define LLM
-llm_predictor = LLMPredictor(llm=ChatOpenAI(temperature=0.5, model_name="gpt-3.5-turbo"))
-service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor)
+parser = SimpleNodeParser()
 
-# build index
-index = GPTKeywordTableIndex.from_documents(documents, service_context=service_context)
+nodes = parser.get_nodes_from_documents(documents)
+
+index = GPTSimpleVectorIndex.from_documents(documents)
 
 index.save_to_disk('index.json')
