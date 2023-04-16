@@ -1,5 +1,6 @@
 from flask import Flask, request, send_file, render_template, jsonify
-import qrcode, os
+from flask_cors import CORS
+import qrcode, os, datetime
 from io import BytesIO
 from llama_index import GPTSimpleVectorIndex
 
@@ -15,6 +16,7 @@ def require_api_key(f):
     return decorated_function
 
 app = Flask(__name__)
+CORS(app)
 
 # read key from environment variable
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
@@ -66,11 +68,25 @@ def representative():
 
     if not text:
         return jsonify({'error': 'No text provided'}), 400
-    
-    response = personal_index.query(text, mode='embedding')
+
+    # Log the received question
+    log_question(text)
+
+    response = index.query(text, mode='embedding')
 
     return jsonify({'text': response.response})
 
+def log_question(question):
+    timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    log_entry = f"{timestamp} - {question}\n"
+
+    # Option 1: Print the log entry to the console
+    print(log_entry)
+
+    # Option 2: Write the log entry to a file
+    with open('questions.log', 'a') as f:
+        f.write(log_entry)
+
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
