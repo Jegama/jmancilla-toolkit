@@ -29,9 +29,6 @@ from llama_index.indices.keyword_table import GPTKeywordTableIndex
 
 personal_index = GPTKeywordTableIndex.load_from_disk('index.json')
 
-# query to test while building the app
-personal_index.query('What is his experience in machine learning?', response_mode="tree_summarize")
-
 @app.route('/')
 def index():
     return render_template('index.html')
