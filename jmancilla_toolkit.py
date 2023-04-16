@@ -2,7 +2,7 @@ from flask import Flask, request, send_file, render_template, jsonify
 from flask_cors import CORS
 import qrcode, os, datetime
 from io import BytesIO
-from llama_index import GPTSimpleVectorIndex
+from llama_index import GPTKeywordTableIndex
 
 from functools import wraps
 
@@ -27,7 +27,7 @@ if app.config['OPENAI_API_KEY'] is None:
 else:
     print("OPENAI_API_KEY loaded successfully.")
 
-personal_index = GPTSimpleVectorIndex.load_from_disk('index.json')
+personal_index = GPTKeywordTableIndex.load_from_disk('index.json')
 
 @app.route('/')
 def index():
