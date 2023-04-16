@@ -2,8 +2,6 @@ from flask import Flask, request, send_file, render_template, jsonify
 from flask_cors import CORS
 import qrcode, os, datetime
 from io import BytesIO
-from llama_index.indices.keyword_table import GPTKeywordTableIndex
-
 from functools import wraps
 
 def require_api_key(f):
@@ -27,7 +25,12 @@ if app.config['OPENAI_API_KEY'] is None:
 else:
     print("OPENAI_API_KEY loaded successfully.")
 
+from llama_index.indices.keyword_table import GPTKeywordTableIndex
+
 personal_index = GPTKeywordTableIndex.load_from_disk('index.json')
+
+# query to test while building the app
+personal_index.query('What is his experience in machine learning?', response_mode="tree_summarize")
 
 @app.route('/')
 def index():
