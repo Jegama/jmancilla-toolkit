@@ -1,1 +1,1 @@
-web: gunicorn qr_code_api:app
+web: gunicorn jmancilla_toolkit:app

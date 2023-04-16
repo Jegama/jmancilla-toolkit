@@ -1,6 +1,7 @@
 from flask import Flask, request, send_file, render_template, jsonify
 import qrcode, os
 from io import BytesIO
+from llama_index import GPTSimpleVectorIndex
 
 from functools import wraps
 
@@ -17,6 +18,14 @@ app = Flask(__name__)
 
 # read key from environment variable
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+app.config['OPENAI_API_KEY'] = os.environ.get('OPENAI_API_KEY')
+
+if app.config['OPENAI_API_KEY'] is None:
+    raise ValueError("OPENAI_API_KEY is not set in the environment variables.")
+else:
+    print("OPENAI_API_KEY loaded successfully.")
+
+index = GPTSimpleVectorIndex.load_from_disk('index.json')
 
 @app.route('/')
 def index():
@@ -49,6 +58,19 @@ def generate_qr_web():
         return jsonify({'error': 'No text provided'}), 400
 
     return jsonify({'text': text})
+
+@app.route('/representative', methods=['POST'])
+def representative():
+    data = request.get_json()
+    text = data.get('text', '')
+
+    if not text:
+        return jsonify({'error': 'No text provided'}), 400
+    
+    response = index.query(text, mode='embedding')
+
+    return jsonify({'text': response.response})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
