@@ -25,7 +25,7 @@ if app.config['OPENAI_API_KEY'] is None:
 else:
     print("OPENAI_API_KEY loaded successfully.")
 
-index = GPTSimpleVectorIndex.load_from_disk('index.json')
+personal_index = GPTSimpleVectorIndex.load_from_disk('index.json')
 
 @app.route('/')
 def index():
@@ -67,7 +67,7 @@ def representative():
     if not text:
         return jsonify({'error': 'No text provided'}), 400
     
-    response = index.query(text, mode='embedding')
+    response = personal_index.query(text, mode='embedding')
 
     return jsonify({'text': response.response})
 
