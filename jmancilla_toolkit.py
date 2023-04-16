@@ -72,7 +72,7 @@ def representative():
     # Log the received question
     log_question(text)
 
-    response = index.query(text, mode='embedding')
+    response = personal_index.query(text, mode='embedding')
 
     return jsonify({'text': response.response})
 
