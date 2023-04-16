@@ -10,6 +10,6 @@ parser = SimpleNodeParser()
 
 nodes = parser.get_nodes_from_documents(documents)
 
-index = GPTSimpleVectorIndex.from_documents(documents)
+index = GPTSimpleVectorIndex(nodes)
 
 index.save_to_disk('index.json')
