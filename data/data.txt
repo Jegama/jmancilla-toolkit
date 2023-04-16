@@ -1,0 +1,212 @@
+I am Jesus G. Mancilla, a skilled Senior Quantitative UX Researcher with a diverse background in large language models, machine learning, human-computer interaction, and user research. My expertise enables me to develop actionable insights and user-centered improvements across various industries, including technology, retail, and academia. I am particularly interested in the integration of machine learning and AI in enhancing user experiences through innovative solutions. One of my recent projects, Calvinist Parrot, is an AI-driven chatbot designed to help users explore and understand the Bible through the lens of Reformed theology, powered by two GPT agents working together to provide thoughtful, accurate, and insightful responses. As a bilingual professional fluent in Spanish and English, I enjoy connecting with global audiences and contributing to meaningful advancements in human-centered design. Discover my research portfolio and explore my CV to learn more about how I can add value to your next project.
+
+----------------------------------------------------------------------------------------------
+
+COVER LETTER
+I am writing to express my interest in the Senior Quantitative UX Researcher position at [Company Name]. With a strong background in UX research, data science, and machine learning, I am confident in my ability to contribute effectively to your team and help drive data-driven insights for the improvement of user experiences.
+
+In my most recent role as a Senior User Experience Researcher at Roku Inc., I developed a Python-based dashboard to automate statistical analysis and reporting of UX metrics. I also coded scripts for automating data analysis from surveys, creating tools to generate reports based on the output. Additionally, I conducted quantitative evaluations on remote controls, leveraging behavioral log analysis from over 70 million devices worldwide.
+
+My experience at Walmart Labs, Scrapworks Inc., and Suggestic further demonstrates my ability to utilize business metrics, interaction analytics, and advanced data analysis techniques, such as deep learning, to prioritize and present data-driven UX research findings. I have a proven track record of successfully implementing data visualization and user behavior analysis, as well as developing algorithms for custom recommendations and forecasting.
+
+I hold an M.S. in Computer Science, specializing in Human-Computer Interaction (HCI) from the Instituto Tecnológico Autónomo de México, and a B.A. in Psychology, specializing in Health Psychology from Universidad de Colima. My educational background, combined with my hands-on experience in both design and data analysis, makes me well-suited for this role. My fluency in both Spanish and English will also be an asset to [Company Name] as it continues to expand its global user base.
+
+I am excited about the opportunity to join [Company Name] and contribute to the development of outstanding user experiences. I look forward to discussing how my skills and experiences can benefit your team and help achieve your goals.
+
+----------------------------------------------------------------------------------------------
+
+CV
+Roku Inc.
+Senior User Experience Researcher
+July 2022 - Present
+User Experience Researcher
+January 2021 - July 2021
+Developed a Python-based dashboard to automate statistical analysis and reporting of UX metrics, coded scripts for automating data analysis from surveys, and created tools to generate reports based on the output.
+Conducted quantitative evaluations on remote controls, leveraging behavioral log analysis from 70+ million devices.
+
+Walmart Labs
+Senior User Experience Researcher
+August 2019 - November 2020
+Connected business metrics and interaction analytics to prioritize research using a data-driven strategy, presenting synthesized research findings to diverse stakeholders.
+Evaluated user experience through qualitative and quantitative research, enabling designers to create human-centered experiences while advocating for users within an interdisciplinary team.
+
+Scrapworks Inc.
+Data Scientist
+September 2017 - July 2019
+Developed an interactive dashboard to visualize and filter 20 years of sales data, resulting in a 30% sales growth.
+Researched RNNs for custom recommendations and forecasting, reducing mean absolute error by 60%.
+
+Suggestic
+Senior User Experience Researcher
+December 2016 - September 2017
+Led the transition from a conversational to a graphical interface, integrating app features while balancing user needs and business requirements.
+Designed storyboards, wireframes, and prototypes to define and lead user engagement metrics.
+
+Stanford University
+User Experience Researcher
+May 2016 - October 2016
+Conducted UX research to design, experiment, and collect 150+ hours of car, biometric, and video data from real-world environments.
+Performed signal processing and statistical analysis of physiological data, developing innovative algorithms to identify the emotional states of automobile drivers with approximately 90% accuracy.
+
+Google
+User Experience Researcher
+January 2016 - June 2016
+Analyzed technology adoption through a longitudinal ethnographic study, inspiring complex changes in multiple use cases.
+
+ITAM
+User Experience Researcher
+August 2014 - May 2016
+Delivered customized solutions for multiple interactive systems (wearable, mobile, web) and conducted usability testing at different development stages.
+Generated custom data visualization, psychophysiological signal analysis, and user-interface design within multiple 10-person teams to identify user behavior patterns.
+
+Stevens Institute of Technology
+Data Science Intern
+June 2015 - August 2015
+Developed a visualization technique to classify over 2 million tweets into new depression-related categories.
+
+Universidad de Colima
+Health Psychology Researcher
+February 2009 - February 2014
+Developed and assessed a psychoeducational program for adults with type 2 diabetes, improving glucose levels in 80% of patients.
+
+Universidad Nacional Autónoma de México
+Clinical Health Psychologist
+June 2011 - August 2011
+Designed and implemented an intervention program to improve diabetes self-management in elderly patients with caregiver-companion assistance.
+
+EDUCATION
+Instituto Tecnológico Autónomo de México
+M.S. in Computer Science, specializing in Human-Computer Interaction (HCI)
+2014 - 2016
+
+Universidad de Colima
+B.A. in Psychology, specializing in Health Psychology
+2008 - 2013
+
+SKILLS
+Languages: Fluent in Spanish and English
+Design: Usability testing (field, in-lab, remote), persona creation, card sorting, interaction and product design, rapid prototyping, usability benchmarking, heuristic evaluation, surveys.
+Data Analysis: Machine learning, deep learning, statistical analysis, data visualization, NLP, R, Javasript, SQL, Python, automation pipelines, data processing, and workflow optimization.
+
+----------------------------------------------------------------------------------------------
+1
+RESEARCH PORTFOLIO
+
+I have worked as a researcher since 2009, starting in behavioral sciences, later working on Human-Computer interaction (HCI), and now as a Senior UX researcher. My work can be classified into three main areas extended below. I have had the pleasure of applying my knowledge to product design and development in different companies and leading impactful research that reaches millions of users.
+
+
+DESIGN RESEARCH
+From experimental design to algorithm validation, I advocate for real-world testing that can complement the in-lab settings. I have been involved in exciting projects to improve multiple products, from wearables and consumer goods to mobile devices and 10-foot experiences. Conducting state-of-the-art research; can help us improve the experience of more people. In addition, by doing research, we can find the information needed to improve the product and give metrics that can help us benchmark our progress.
+My main goal is to translate research findings into actionable recommendations. This is by designing lean experiments that can be replicated and tailored to understand the user and answer business questions. I advocate having behavioral log data to have large-scale patterns and in-depth knowledge through interviewing people to understand the "how" and "why" of their behavior.
+
+OVERVIEW
+This project aimed to have a better understanding of drivers in real-world scenarios. The goal was to create a stress elicitation technique that can be efficiently and reliably duplicated. We used both scripted in-vehicle stressor events and unscripted on-road stressors such as pedestrians and construction zones. An algorithm was used to identify windows where the participant was experiencing stress and validated using participant self-report.
+
+Paper: Eliciting Driver Stress Using Naturalistic Driving Scenarios on Real Roads.
+
+GOAL
+Propose instrumentation that could be used to measure the driver experience and its validity for analysis.
+Validate a stress elicitation technique that could be replicated on the road and safe for drivers.
+
+SOLUTIONS
+The proposed approach was a mixed methodology, where the participant behavior was quantified using psychophysiological measurements and validated with interviews before, during, and after the experiment.
+The experimental design can be described as follows: Participants drive up a windy, secluded mountain road with poor cellular reception. They are told that they have plenty of charge for the study. Unbeknownst to the driver, we installed an experimental display that gives visual and auditory warnings of low battery charge 15 minutes into their drive. After 22 minutes of driving, the screen shows' empty', and the car demands to pull over to the side of the road. At this point, the driver attempts to call the research team.
+
+FINDINGS
+The two main results were:
+The eliciting technique was successfully replicated, and 90% of participants experienced stress.
+89% of the stress events were correlated with road events.
+Given the nature of these kinds of experiments, having scripted and unscripted events gives a better picture of how automotive drivers react to different stimuli.
+
+TAKEAWAYS
+This experiment's biggest takeaways were having open communication with everyone involved and driving meaningful research in all stages, particularly with the follow-up. And given the hybrid nature of this research, the collaboration between different areas of expertise was valuable.
+
+USER RESEARCH
+Given my hybrid background (psychology-computer science), this has been the most exciting part of my work. Understanding user behavior and creating digital solutions that will enhance their lives. I have experience in all the product's life cycle, from the early stages to the final products serving thousands of users.
+General skills:
+Usability testing (field, in-lab, remote)
+Prototyping (low- and high-fidelity)
+Surveys (Design and analysis)
+Interviews
+User Personas
+
+OVERVIEW
+The most exciting projects I have done are hardware-related, from wearable devices to self-driving cars. And as I had the opportunity to partner with outstanding researchers, I continued the work of understanding how people use their remote control and pilot metrics and systems to benchmark how much we have improved from previous iterations.
+
+GOALS
+Encode a framework for statistical analysis of the aggregate usability testing and behavioral log analysis.
+Validate the proposed metrics to gauge how devices stand between each other.
+
+INITIAL BASELINES
+This project started in collaboration with a senior researcher who created the initial framework to evaluate the most common tasks users perform with their remote control while using their smart TVs. During a year, we conducted multiple usability studies to fine-tune the metrics and tasks, gathering data to run statistical tests to compare them.
+During this initial phase, I worked on the statistical analysis and gathered the behavioral logs to understand the aggregate usage of the 70+ million devices currently in use. 
+
+EVOLUTION
+The findings of this research led to a new remote launched in the Fall of '22. While this remote control was under hardware testing, I evaluated our remote controls, adding the button presses recorded during the studies. 
+While evaluating other remote controls, additional features not previously included in the metrics were added, given that they are exclusive to some remotes. This evaluation included country-specific metrics and a dashboard to gauge the different behaviors per country and between remote controls, which have distinct features.
+
+TAKEAWAYS
+Collaborating with the designers and PMs was valuable in understanding what was most meaningful for them. In addition, it solidified our research, which led to a change in the direction of some decisions taken before having the data.
+Given that this project continued intermittently for two years, having well-documented research and moderator guides and scripting the statistical analysis to optimize the work proved critical to delivering valuable results to our stakeholders.
+
+RESEARCH OPS
+Successful leadership starts with a person that lives to serve others. I have had the privilege to teach trainees and lead research teams in academia and international groups throughout my carrier. The challenges are the same in both worlds: communication is vital for success. One of the most successful projects across multiple companies has been the standardization of reports and consolidation, leading to higher visibility for the research team across numerous teams.
+
+OVERVIEW
+Successful leadership starts with a person that lives to serve others. I have had the privilege to teach trainees and lead research teams in academia and international groups throughout my carrier. The challenges are the same in both worlds: communication is vital for success. One of the most successful projects across multiple companies has been the standardization of reports and consolidation, leading to higher visibility for the research team across numerous teams.
+
+SOLUTION
+One of the most common problems I have encountered is that highly skilled people often don't have the necessary visibility to present their results. Having a centralized tool to share the information and the findings has been advantageous to show progress and increase collaboration. 
+However, adoption has been an issue on different occasions. Not everyone is on board to try new things; I have handled this to do a progressive rollout. I start with my immediate team, where I have a better rapport with the researchers, and I present it as a "pilot," with no strings attached. Once the first results and improvements started to surface, I onboarded more teams to leverage the research team's work for the rest of the UX org. 
+
+RESULTS
+The results were noteworthy. The team created a repository with all the research and once it started getting traction with the rest of the teams across the org, looking through our knowledge base became self-served. 
+Another advantage was the visualization tools; it helped the leadership glance at the projects' current state. As a result, it a result, it a result, it helps them make informed decisions about where the project lacks or needs more resources. For example, the visualization below helps them to know what projects need more attention on a given day.
+
+TAKEAWAYS
+The added process and documentation needed to standardize the team's work is a complicated hurdle to overcome. But once the team starts seeing the benefit of having a searchable repository, it encourages them to socialize it with others.
+Change can be knotty for people, and imposing tools doesn't help. Therefore, a successful manager should find a progressive rollout considering their team.
+
+----------------------------------------------------------------------------------------------
+
+PUBLISHED PAPERS
+Baltodano, Sonia, Jesus Garcia-Mancilla, and Wendy Ju. "Eliciting Driver Stress Using Naturalistic Driving Scenarios on Real Roads." In Proceedings of the 10th International Conference on Automotive User Interfaces and Interactive Vehicular Applications, pp. 298-309. ACM, 2018.
+https://dl.acm.org/doi/10.1145/3239060.3239090
+ABSTRACT
+We propose a novel method for reliably inducing stress in drivers for the purpose of generating real-world participant data for machine learning, using both scripted in-vehicle stressor events and unscripted on-road stressors such as pedestrians and construction zones. On-road drives took place in a vehicle outfitted with an experimental display that lead drivers to believe they had prematurely ran out of charge on an isolated road. We describe the elicitation method, course design, instrumentation, data collection procedure and the post-hoc labeling of unplanned road events to illustrate how rich data about a variety of stress-related events can be elicited from study participants on-road. We validate this method with data including psychophysiological measurements, video, voice, and GPS data from (N=20) participants. Results from algorithmic psychophysiological stress analysis were validated using participant self-reports. Results of stress elicitation analysis show that our method elicited a stress-state in 89% of participants.
+
+Currano, Rebecca, So Yeon Park, Lawrence Domingo, Jesus Garcia-Mancilla, Pedro C. Santana-Mancilla, Victor M. Gonzalez, and Wendy Ju. "¡ Vamos!: Observations of Pedestrian Interactions with Driverless Cars in Mexico." In Proceedings of the 10th International Conference on Automotive User Interfaces and Interactive Vehicular Applications, pp. 210-220. ACM, 2018.
+https://dl.acm.org/doi/10.1145/3239060.3241680
+ABSTRACT
+How will pedestrians from different regions interact with an approaching autonomous vehicle? Understanding differences in pedestrian culture and responses can help inform autonomous cars how to behave appropriately in different regional contexts. We conducted a field study comparing the behavioral response of pedestrians between metropolitan Mexico City (N=113) and Colima, a smaller coastal city (N=81). We hid a driver in a car seat costume as a Wizard-of-Oz prototype to evoke pedestrian interaction behavior at a crosswalk or street. Pedestrian interactions were coded for crossing decision, crossing pathway, pacing, and observational behavior. Most distinctly, pedestrians in Mexico City kept their pace and more often crossed in front of the vehicle, while those in Colima stopped in front of the car more often.
+
+J. Garcia-Mancilla, J. E. Ramirez-Marquez, C. Lipizzi, G. T. Vesonder, and V. M. Gonzalez, “Characterizing negative sentiments in at-risk populations via crowd computing: a computational social science approach,” International Journal of Data Science and Analytics, Jun. 2018.
+https://link.springer.com/article/10.1007/s41060-018-0135-9
+ABSTRACT
+Drawing on psychological theory, we created a new approach to classify negative sentiment tweets and presented a subset of unclassified tweets to humans for categorization. With these results, a tweet classification distribution was built to visualize how the tweets can fit in different categories. The approach developed through visualization and classification of data could be an important base to measure the efficiency of a machine classifier with psychological diagnostic criteria as the base (Thelwall et al. in J Assoc Inf Sci Technol 62(4):406–418, 2011). Nonetheless, this proposed system is used to identify red flags in at-risk population for further intervention, due to the need to be validated through therapy with an expert.
+
+Garcia-Mancilla J., Martinez V.R., Gonzalez V.M., Fajardo A.F. (2016) Social Influence and Emotional State While Shopping. In: Nah FH., Tan CH. (eds) HCI in Business, Government, and Organizations: eCommerce and Innovation. HCIBGO 2016. Lecture Notes in Computer Science, vol 9751. Springer, Cham
+https://link.springer.com/chapter/10.1007/978-3-319-39396-4_35
+ABSTRACT
+New technologies are opening novel ways to help people in their decision-making while shopping. From crowd-generated customer reviews to geo-based recommendations, the information to make the decision could come from different social circles with varied degrees of expertise and knowledge. Such differences affect how much influence the information has on the shopping decisions. In this work, we aim to identify how social influence when it is mediated by modern and ubiquitous communication (such as that provided by smartphones) can affect people’s shopping experience and especially their emotions while shopping. Our results showed that large amount of information affects emotional state in costumers, which can be measured in their physiological response. Based on our results, we conclude that integrating smartphone technologies with biometric sensors can create new models of customer experience based on the emotional effects of social influence while shopping.
+
+Garcia-Mancilla J., Gonzalez V.M. (2016) Stress Quantification Using a Wearable Device for Daily Feedback to Improve Stress Management. In: Zheng X., Zeng D., Chen H., Leischow S. (eds) Smart Health. Lecture Notes in Computer Science, vol 9545. Springer, Cham
+https://link.springer.com/chapter/10.1007/978-3-319-29175-8_19
+ABSTRACT
+Stress is becoming a major problem in our society and most people do not know how to cope with it. We propose a novel approach to quantify the stress level using psychophysiological measures. Using an automatic stress detector that can be implemented in a mobile application, we managed to create an alternative to automatically detect stress using sensors from a wearable device, and once it is detected, a score is calculated for each one of the records. By identifying the stress during the day and giving a numeric value from biological signals to it, a visualization could be produced to facilitate the analysis information by users.
+
+L. Ferrer, J. Garcia-Mancilla, V. M. Gonzalez, S. Bermudez, P. Bleier and C. Prieto, "Using augmented reality in urban context: Georeferenced system for business localization using Google Glass," 2015 IEEE First International Smart Cities Conference (ISC2), Guadalajara, 2015, pp. 1-6. doi: 10.1109/ISC2.2015.7366157
+https://ieeexplore.ieee.org/abstract/document/7366157
+ABSTRACT
+Developing new paradigms of user interaction is always challenging. The introduction of the Google Glass platform presents a novel way to deliver content to users. Clearly, the Glass platform is not going to become a mainstream consumer electronics product as it is; however it was an experimental program from which important practical lessons can be learned. We, as part of the Google Glass Explorer Community, present this study as a contribution to the practical understanding of products that can be core for the development of micro-interaction-based interfaces for wearable gadgets in urban contexts. Throughout this paper we detail the development process of this kind of application by focusing on the challenges presented, the implementation and design decisions, and the usability tests we performed. The main results were that the use of the app is intuitive in general, but the users have problems identifying several components that were adapted for the size of the screen and the concept of the device.
+
+González V.M., García J., Muro B. (2015) Searching for Information: Comparing Text vs. Visual Search with Newspapers Websites. In: Yamamoto S. (eds) Human Interface and the Management of Information. Information and Knowledge Design. HIMI 2015. Lecture Notes in Computer Science, vol 9172. Springer, Cham
+https://link.springer.com/chapter/10.1007/978-3-319-20612-7_17
+ABSTRACT
+Different approaches used to define how a website shows information have an impact on how users evaluate its usability. As shown in the present study, how people accomplish a search of visual content in a newspaper website is an important factor to review while designing it. In this study, 47 participants were randomly assigned to evaluate one of two different newspaper websites and asked to do visual and written searches. The evaluation metrics were: task success and task time. Also the participants made an overall evaluation of the site, answering two Likert questions and an open-ended question to measure qualitative aspects. Finally, we measured the overall satisfaction with a SUS questionnaire. The results show that a poor performance in the search of visual content lead to lower usability perception, this might be a main aspect to improve when defining priorities to enhance overall usability.
+
+Garcia-Mancilla J., Montes-Delgado R., Santana-Mancilla P. Quality of Life (QoL) and self-efficacy on elderly with diabetes mellitus type 2: Study in the Mexican State of Colima. Rendez-Vous 2012, Thunder Bay, Canada, Octubre 2012.
+
+Montes R., Garcia-Mancilla J., Oropeza-Tena R. Self-control techniques for the right management of diabetes mellitus type 2 (DM2) in adults. Rendez-Vous 2012, Thunder Bay, Canada, Octubre 2012.
+
+Garcia-Mancilla, J., Rodriguez-Morrill, E. I. y Velasco-Alcazar, C. C. (2011). Análisis de contenidos sobre adultos mayores en las currículas de la Universidad de Colima. Universidad de Colima: Colima, México.
