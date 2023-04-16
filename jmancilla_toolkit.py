@@ -2,7 +2,7 @@ from flask import Flask, request, send_file, render_template, jsonify
 from flask_cors import CORS
 import qrcode, os, datetime
 from io import BytesIO
-from llama_index import GPTKeywordTableIndex
+from llama_index.indices.keyword_table import GPTKeywordTableIndex
 
 from functools import wraps
 
@@ -72,7 +72,7 @@ def representative():
     # Log the received question
     log_question(text)
 
-    response = personal_index.query(text)
+    response = personal_index.query(text, response_mode="tree_summarize")
 
     return jsonify({'text': response.response})
 
