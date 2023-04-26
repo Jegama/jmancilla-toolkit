@@ -1,4 +1,4 @@
-from llama_index import GPTSimpleVectorIndex, LangchainEmbedding, LLMPredictor, ServiceContext
+from llama_index import GPTSimpleVectorIndex, LangchainEmbedding, LLMPredictor, ServiceContext, PromptHelper
 from llama_index.optimization.optimizer import SentenceEmbeddingOptimizer
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from langchain import HuggingFacePipeline
@@ -23,11 +23,20 @@ print('\nLoading model...')
 repo_id = "stabilityai/stablelm-tuned-alpha-7b"
 # repo_id = "databricks/dolly-v2-3b"
 
-stablelm = HuggingFacePipeline.from_model_id(model_id=repo_id, task="text-generation",  model_kwargs={"max_length":1024})
+stablelm = HuggingFacePipeline.from_model_id(model_id=repo_id, task="text-generation",  model_kwargs={"max_length":1200})
 embed_model = LangchainEmbedding(HuggingFaceEmbeddings())
 llm_predictor = LLMPredictor(llm=stablelm)
 
-service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor, embed_model=embed_model)
+# define prompt helper
+# set maximum input size
+max_input_size = 4096
+# set number of output tokens
+num_output = 512
+# set maximum chunk overlap
+max_chunk_overlap = 20
+prompt_helper = PromptHelper(max_input_size, num_output, max_chunk_overlap)
+
+service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor, embed_model=embed_model, prompt_helper=prompt_helper)
 # service_context = ServiceContext.from_defaults(embed_model=embed_model)
 
 index = GPTSimpleVectorIndex.load_from_disk('cs_index.json', service_context=service_context)
@@ -36,11 +45,8 @@ print("\nRunning query with optimization")
 start_time = time.time()
 response = index.query("How do I fix a wifi issue?",  mode="embedding", optimizer=SentenceEmbeddingOptimizer(percentile_cutoff=0.5, embed_model=embed_model))
 end_time = time.time()
-print("Total time elapsed: {}".format(end_time - start_time))
+print("\nTotal time elapsed: {:.2f}".format(end_time - start_time))
 print("Answer: {}".format(response))
-
-print('\nStr - ', str(response))
-print('\nDot response - ', response.response)
 
 print(format_source_node(response))
 
