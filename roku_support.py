@@ -1,9 +1,10 @@
 from llama_index import GPTSimpleVectorIndex, LangchainEmbedding, LLMPredictor, ServiceContext
+from llama_index.optimization.optimizer import SentenceEmbeddingOptimizer
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from langchain import HuggingFacePipeline
 import pandas as pd
 from dotenv import load_dotenv
-import re
+import re, time
 load_dotenv()
 
 docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
@@ -22,16 +23,21 @@ print('\nLoading model...')
 repo_id = "stabilityai/stablelm-tuned-alpha-7b"
 # repo_id = "databricks/dolly-v2-3b"
 
-stablelm = HuggingFacePipeline.from_model_id(model_id=repo_id, task="text-generation",  
-                                             model_kwargs={"max_length":1024})
+stablelm = HuggingFacePipeline.from_model_id(model_id=repo_id, task="text-generation",  model_kwargs={"max_length":1024})
 embed_model = LangchainEmbedding(HuggingFaceEmbeddings())
 llm_predictor = LLMPredictor(llm=stablelm)
 
 service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor, embed_model=embed_model)
+# service_context = ServiceContext.from_defaults(embed_model=embed_model)
 
 index = GPTSimpleVectorIndex.load_from_disk('cs_index.json', service_context=service_context)
 
-response = index.query('How do I fix a wifi issue?', response_mode="tree_summarize")
+print("\nRunning query with optimization")
+start_time = time.time()
+response = index.query("How do I fix a wifi issue?",  mode="embedding", optimizer=SentenceEmbeddingOptimizer(percentile_cutoff=0.5, embed_model=embed_model))
+end_time = time.time()
+print("Total time elapsed: {}".format(end_time - start_time))
+print("Answer: {}".format(response))
 
 print('\nStr - ', str(response))
 print('\nDot response - ', response.response)
