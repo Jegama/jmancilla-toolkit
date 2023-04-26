@@ -1,11 +1,10 @@
 from llama_index import GPTSimpleVectorIndex, download_loader, LangchainEmbedding, LLMPredictor, ServiceContext
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 from llama_index.node_parser import SimpleNodeParser
-from llama_index.utils import truncate_text
 from langchain import HuggingFacePipeline
 import pandas as pd
 from dotenv import load_dotenv
-import json
+import json, time
 load_dotenv()
 
 
@@ -28,17 +27,25 @@ index = GPTSimpleVectorIndex([], service_context=service_context)
 
 urls = pd.read_csv('cs_articles.csv')['urls'].tolist()
 docid_to_url = {}
+tokens_used = 0
+
+start = time.time()
 
 print('\nPopulating index...')
 for page in urls:
     documents = loader.load_data(url=page)
     nodes = parser.get_nodes_from_documents(documents)
     docid_to_url[nodes[0].doc_id] = page
+    tokens_used += int(embed_model.last_token_usage) * 0.0004 
     index.insert_nodes(nodes)
 
-index.save('cs_index.json')
+print(f'\nIndex populated in {(time.time() - start)/60} minutes')
+
+index.save_to_disk('cs_index.json')
 with open('cs_docid_to_url.json', 'w') as f:
     json.dump(docid_to_url, f)
 
-print('\nTokens used to build index\nTokens used on prediction: ', llm_predictor.last_token_usage)
-print('\nTokens used on embedding: ', embed_model.last_token_usage)
+print('\nTokens used to build index\nEmgedding tokens $: ', tokens_used)
+
+# Tokens used to build index
+# Tokens used on embedding:  381236

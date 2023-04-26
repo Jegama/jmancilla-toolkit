@@ -1,7 +1,5 @@
-from llama_index import GPTSimpleVectorIndex, download_loader, LangchainEmbedding, LLMPredictor, ServiceContext
+from llama_index import GPTSimpleVectorIndex, LangchainEmbedding, LLMPredictor, ServiceContext
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-from llama_index.node_parser import SimpleNodeParser
-from llama_index.utils import truncate_text
 from langchain import HuggingFacePipeline
 import pandas as pd
 from dotenv import load_dotenv
@@ -24,16 +22,21 @@ print('\nLoading model...')
 repo_id = "stabilityai/stablelm-tuned-alpha-7b"
 # repo_id = "databricks/dolly-v2-3b"
 
-stablelm = HuggingFacePipeline.from_model_id(model_id=repo_id, task="text-generation")
+stablelm = HuggingFacePipeline.from_model_id(model_id=repo_id, task="text-generation",  
+                                             model_kwargs={"max_length":1024})
 embed_model = LangchainEmbedding(HuggingFaceEmbeddings())
 llm_predictor = LLMPredictor(llm=stablelm)
+
 service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor, embed_model=embed_model)
 
 index = GPTSimpleVectorIndex.load_from_disk('cs_index.json', service_context=service_context)
 
 response = index.query('How do I fix a wifi issue?', response_mode="tree_summarize")
 
-print(response)
+print('\nStr - ', str(response))
+print('\nDot response - ', response.response)
 
 print(format_source_node(response))
 
+print('\nTokens to generate response\nLLM tokens $', (int(llm_predictor.last_token_usage) * 0.02))
+print('Embedding tokens $', (int(embed_model.last_token_usage) * 0.0004 ))
