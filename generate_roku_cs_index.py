@@ -12,8 +12,8 @@ ReadabilityWebPageReader = download_loader("ReadabilityWebPageReader")
 loader = ReadabilityWebPageReader(wait_until="networkidle")
 
 print('\nLoading model...')
-repo_id = "stabilityai/stablelm-tuned-alpha-7b"
-# repo_id = "databricks/dolly-v2-3b"
+# repo_id = "stabilityai/stablelm-tuned-alpha-7b"
+repo_id = "databricks/dolly-v2-3b"
 
 stablelm = HuggingFacePipeline.from_model_id(model_id=repo_id, task="text-generation")
 embed_model = LangchainEmbedding(HuggingFaceEmbeddings())
@@ -41,11 +41,10 @@ for page in urls:
 
 print(f'\nIndex populated in {(time.time() - start)/60} minutes')
 
-index.save_to_disk('cs_index.json')
-with open('cs_docid_to_url.json', 'w') as f:
-    json.dump(docid_to_url, f)
+index.save_to_disk('cs_index_dolly.json')
+# with open('cs_docid_to_url.json', 'w') as f:
+#     json.dump(docid_to_url, f)
 
-print('\nTokens used to build index\nEmgedding tokens $: ', tokens_used)
-
+print('\nTokens to build index\nLLM tokens $', (int(llm_predictor.last_token_usage) * 0.02))
+print('Embedding tokens $', (int(embed_model.last_token_usage) * 0.0004 ))
 # Tokens used to build index
-# Tokens used on embedding:  381236
