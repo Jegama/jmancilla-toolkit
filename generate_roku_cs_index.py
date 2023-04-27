@@ -32,7 +32,7 @@ tokens_used = 0
 start = time.time()
 
 print('\nPopulating index...')
-for page in urls:
+for page in urls[:100]:
     documents = loader.load_data(url=page)
     nodes = parser.get_nodes_from_documents(documents)
     docid_to_url[nodes[0].doc_id] = page
@@ -42,9 +42,8 @@ for page in urls:
 print(f'\nIndex populated in {(time.time() - start)/60} minutes')
 
 index.save_to_disk('cs_index_dolly.json')
-# with open('cs_docid_to_url.json', 'w') as f:
-#     json.dump(docid_to_url, f)
+with open('cs_docid_to_url_dolly.json', 'w') as f:
+    json.dump(docid_to_url, f)
 
-print('\nTokens to build index\nLLM tokens $', (int(llm_predictor.last_token_usage) * 0.02))
-print('Embedding tokens $', (int(embed_model.last_token_usage) * 0.0004 ))
+print('\nTokens to build index\nEmbedding tokens $', tokens_used)
 # Tokens used to build index
