@@ -1,3 +1,4 @@
+from flask import Flask, request, jsonify
 from llama_index import GPTSimpleVectorIndex, LangchainEmbedding, LLMPredictor, ServiceContext, PromptHelper
 from llama_index.optimization.optimizer import SentenceEmbeddingOptimizer
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
@@ -7,9 +8,10 @@ from dotenv import load_dotenv
 import re, time
 load_dotenv()
 
-# set PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
+app = Flask(__name__)
 
-docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
+
+docid_to_url = pd.read_json('cs_docid_to_url_dolly.json', typ='series').to_dict()
 
 def format_source_node(response_):
         """Get formatted sources text."""
@@ -41,17 +43,28 @@ prompt_helper = PromptHelper(max_input_size, num_output, max_chunk_overlap)
 service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor, embed_model=embed_model, prompt_helper=prompt_helper)
 # service_context = ServiceContext.from_defaults(embed_model=embed_model)
 
-index = GPTSimpleVectorIndex.load_from_disk('cs_index.json', service_context=service_context)
+index = GPTSimpleVectorIndex.load_from_disk('cs_index_dolly.json', service_context=service_context)
 
-print("\nRunning query with optimization")
-start_time = time.time()
-response = index.query("My remote is not working", optimizer=SentenceEmbeddingOptimizer(percentile_cutoff=0.5, embed_model=embed_model))
-end_time = time.time()
+def get_query_result(question):
+    start_time = time.time()
+    response = index.query(question, optimizer=SentenceEmbeddingOptimizer(percentile_cutoff=0.5, embed_model=embed_model))
+    end_time = time.time()
+    return {
+        "response": str(response),
+        "formatted_sources": format_source_node(response),
+        "elapsed_time": end_time - start_time,
+    }
 
-print("\nTotal time elapsed: {:.2f}".format(end_time - start_time))
-print(f"\n{response}")
+@app.route('/query', methods=['POST'])
+def query():
+    data = request.get_json(force=True)
+    question = data.get('question', None)
 
-print(format_source_node(response))
+    if not question:
+        return jsonify({"error": "No question provided"}), 400
 
-print('\nTokens to generate response\nLLM tokens $', (int(llm_predictor.last_token_usage) * 0.02))
-print('Embedding tokens $', (int(embed_model.last_token_usage) * 0.0004 ))
+    result = get_query_result(question)
+    return jsonify(result)
+
+if __name__ == '__main__':
+    app.run(debug=True, use_reloader=False)
