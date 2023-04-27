@@ -1,8 +1,7 @@
 from flask import Flask, request, jsonify
-from llama_index import GPTSimpleVectorIndex, LangchainEmbedding, LLMPredictor, ServiceContext, PromptHelper
+from llama_index import GPTSimpleVectorIndex, LangchainEmbedding, ServiceContext
 from llama_index.optimization.optimizer import SentenceEmbeddingOptimizer
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-from langchain import HuggingFacePipeline
 import pandas as pd
 from dotenv import load_dotenv
 import re, time
@@ -11,7 +10,7 @@ load_dotenv()
 app = Flask(__name__)
 
 
-docid_to_url = pd.read_json('cs_docid_to_url_dolly.json', typ='series').to_dict()
+docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
 
 def format_source_node(response_):
         """Get formatted sources text."""
@@ -24,26 +23,12 @@ def format_source_node(response_):
         return "\n\n".join(texts)
 
 print('\nLoading model...')
-repo_id = "stabilityai/stablelm-tuned-alpha-3b"
-# repo_id = "databricks/dolly-v2-3b"
 
-stablelm = HuggingFacePipeline.from_model_id(model_id=repo_id, task="text-generation", model_kwargs={"max_length":2048})
 embed_model = LangchainEmbedding(HuggingFaceEmbeddings())
-llm_predictor = LLMPredictor(llm=stablelm)
 
-# define prompt helper
-# set maximum input size
-max_input_size = 4096
-# set number of output tokens
-num_output = 512
-# set maximum chunk overlap
-max_chunk_overlap = 64
-prompt_helper = PromptHelper(max_input_size, num_output, max_chunk_overlap)
+service_context = ServiceContext.from_defaults(embed_model=embed_model)
 
-service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor, embed_model=embed_model, prompt_helper=prompt_helper)
-# service_context = ServiceContext.from_defaults(embed_model=embed_model)
-
-index = GPTSimpleVectorIndex.load_from_disk('cs_index_dolly.json', service_context=service_context)
+index = GPTSimpleVectorIndex.load_from_disk('cs_index.json', service_context=service_context)
 
 def get_query_result(question):
     start_time = time.time()
