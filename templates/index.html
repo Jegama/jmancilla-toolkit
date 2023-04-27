@@ -19,6 +19,10 @@
             margin-top: 2rem;
             max-width: 100%;
         }
+
+        .key {
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -51,7 +55,21 @@
 
             // Display the API response in the 'api-response' div
             const apiResponseDiv = document.getElementById('api-response');
-            apiResponseDiv.textContent = JSON.stringify(data, null, 2);
+            apiResponseDiv.innerHTML = ''; // Clear previous content
+
+            // Access the properties by their keys and display them in the desired order
+            const responseDiv = document.createElement('div');
+            responseDiv.innerHTML = data.response.replace(/\n/g, '<br>');
+            apiResponseDiv.appendChild(responseDiv);
+
+            const formattedSourcesDiv = document.createElement('div');
+            formattedSourcesDiv.innerHTML = data.formatted_sources.replace(/\n/g, '<br>');
+            apiResponseDiv.appendChild(formattedSourcesDiv);
+
+            const elapsedTimeDiv = document.createElement('div');
+            elapsedTimeDiv.textContent = 'Elapsed Time: ' + data.elapsed_time;
+            apiResponseDiv.appendChild(elapsedTimeDiv);
+
 
         });
         // document.getElementById('qr-form').addEventListener('submit', async (e) => {

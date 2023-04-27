@@ -17,7 +17,7 @@ app = Flask(__name__)
 CORS(app)
 
 # read key from environment variable
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+# app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['OPENAI_API_KEY'] = os.environ.get('OPENAI_API_KEY')
 
 if app.config['OPENAI_API_KEY'] is None:
@@ -26,14 +26,19 @@ else:
     print("OPENAI_API_KEY loaded successfully.")
 
 
-from llama_index import GPTSimpleVectorIndex
+from llama_index import GPTSimpleVectorIndex, LangchainEmbedding, ServiceContext
 from llama_index.optimization.optimizer import SentenceEmbeddingOptimizer
+from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 import pandas as pd
+
+embed_model = LangchainEmbedding(HuggingFaceEmbeddings())
+
+service_context = ServiceContext.from_defaults(embed_model=embed_model)
 
 docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
 
-personal_index = GPTSimpleVectorIndex.load_from_disk('index.json')
-cs_index = GPTSimpleVectorIndex.load_from_disk('cs_index.json')
+# personal_index = GPTSimpleVectorIndex.load_from_disk('index.json', service_context=service_context)
+cs_index = GPTSimpleVectorIndex.load_from_disk('cs_index.json', service_context=service_context)
 
 @app.route('/')
 def index():
@@ -110,24 +115,28 @@ def format_source_node(response_):
 
 def get_query_result(question):
     start_time = time.time()
-    response = cs_index.query(question, optimizer=SentenceEmbeddingOptimizer(percentile_cutoff=0.5))
+    response = cs_index.query(question, optimizer=SentenceEmbeddingOptimizer(percentile_cutoff=0.5, embed_model=embed_model))
     end_time = time.time()
+    elapsed_time = end_time - start_time
     return {
-        "response": str(response),
+        "response": f'\n{response}',
         "formatted_sources": format_source_node(response),
-        "elapsed_time": end_time - start_time,
+        "elapsed_time": f'\n{elapsed_time:.2f} seconds',
     }
 
 @app.route('/query_cs', methods=['POST'])
 def query():
-    data = request.get_json(force=True)
-    question = data.get('question', None)
+    data = request.get_json()
+    text = data.get('text', '')
 
-    if not question:
-        return jsonify({"error": "No question provided"}), 400
+    if not text:
+        return jsonify({'error': 'No text provided'}), 400
 
-    result = get_query_result(question)
+    # Log the received question
+    log_question(text)
+
+    result = get_query_result(text)
     return jsonify(result)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
