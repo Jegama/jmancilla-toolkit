@@ -26,19 +26,14 @@ else:
     print("OPENAI_API_KEY loaded successfully.")
 
 
-from llama_index import GPTSimpleVectorIndex, LangchainEmbedding, ServiceContext
+from llama_index import GPTSimpleVectorIndex
 from llama_index.optimization.optimizer import SentenceEmbeddingOptimizer
-from langchain.embeddings.huggingface import HuggingFaceEmbeddings
 import pandas as pd
-
-embed_model = LangchainEmbedding(HuggingFaceEmbeddings())
-
-service_context = ServiceContext.from_defaults(embed_model=embed_model)
 
 docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
 
 # personal_index = GPTSimpleVectorIndex.load_from_disk('index.json', service_context=service_context)
-cs_index = GPTSimpleVectorIndex.load_from_disk('cs_index.json', service_context=service_context)
+cs_index = GPTSimpleVectorIndex.load_from_disk('cs_index.json')
 
 @app.route('/')
 def index():
