@@ -23,18 +23,19 @@
 </head>
 
 <body>
-    <h1>QR Code Generator</h1>
+    <h1>Roku CS AI</h1>
     <form id="qr-form">
         <label for="text">Enter text:</label>
-        <input type="text" id="text" name="text" required>
-        <button type="submit">Generate QR Code</button>
+        <input type="text" id="text" name="text" required placeholder="How can I help you?">
+        <button type="submit">Ask Roku CS AI</button>
     </form>
-    <img id="qr-code" src="" alt="Generated QR code" style="display:none;">
+    <div id="api-response"></div>
+    <!-- <img id="qr-code" src="" alt="Generated QR code" style="display:none;"> -->
     <script>
         document.getElementById('qr-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const text = document.getElementById('text').value;
-            const response = await fetch('/generate_qr_web', {
+            const response = await fetch('/query_cs', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -48,22 +49,44 @@
                 return;
             }
 
-            generateQRCode(data.text);
+            // Display the API response in the 'api-response' div
+            const apiResponseDiv = document.getElementById('api-response');
+            apiResponseDiv.textContent = JSON.stringify(data, null, 2);
+
         });
+        // document.getElementById('qr-form').addEventListener('submit', async (e) => {
+        //     e.preventDefault();
+        //     const text = document.getElementById('text').value;
+        //     const response = await fetch('/generate_qr_web', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify({ text })
+        //     });
+        //     const data = await response.json();
 
-        function generateQRCode(text) {
-            const qrCodeElement = document.getElementById('qr-code');
-            qrCodeElement.style.display = "none";
+        //     if (data.error) {
+        //         alert(data.error);
+        //         return;
+        //     }
 
-            QRCode.toDataURL(text, { width: 256, height: 256 }, function (err, url) {
-                if (err) {
-                    console.error(err);
-                    return;
-                }
-                qrCodeElement.src = url;
-                qrCodeElement.style.display = "block";
-            });
-        }
+        //     generateQRCode(data.text);
+        // });
+
+        // function generateQRCode(text) {
+        //     const qrCodeElement = document.getElementById('qr-code');
+        //     qrCodeElement.style.display = "none";
+
+        //     QRCode.toDataURL(text, { width: 256, height: 256 }, function (err, url) {
+        //         if (err) {
+        //             console.error(err);
+        //             return;
+        //         }
+        //         qrCodeElement.src = url;
+        //         qrCodeElement.style.display = "block";
+        //     });
+        // }
 
     </script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
