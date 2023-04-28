@@ -110,7 +110,7 @@ def format_source_node(response_):
 
 def get_query_result(question):
     start_time = time.time()
-    response = cs_index.query(question, optimizer=SentenceEmbeddingOptimizer(percentile_cutoff=0.5, embed_model=embed_model))
+    response = cs_index.query(question, optimizer=SentenceEmbeddingOptimizer(percentile_cutoff=0.5))
     end_time = time.time()
     elapsed_time = end_time - start_time
     return {
