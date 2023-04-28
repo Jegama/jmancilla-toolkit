@@ -17,7 +17,7 @@ app = Flask(__name__)
 CORS(app)
 
 # read key from environment variable
-# app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['OPENAI_API_KEY'] = os.environ.get('OPENAI_API_KEY')
 
 if app.config['OPENAI_API_KEY'] is None:
@@ -32,7 +32,7 @@ import pandas as pd
 
 docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
 
-# personal_index = GPTSimpleVectorIndex.load_from_disk('index.json', service_context=service_context)
+personal_index = GPTSimpleVectorIndex.load_from_disk('index.json')
 cs_index = GPTSimpleVectorIndex.load_from_disk('cs_index.json')
 
 @app.route('/')
