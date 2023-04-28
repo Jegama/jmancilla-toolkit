@@ -3,6 +3,8 @@ from flask_cors import CORS
 import qrcode, os, datetime, re, time
 from io import BytesIO
 from functools import wraps
+from dotenv import load_dotenv
+load_dotenv()
 
 def require_api_key(f):
     @wraps(f)
