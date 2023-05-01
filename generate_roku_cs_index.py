@@ -35,5 +35,3 @@ print('\nTotal cost: $', totat_cost)
 index.save_to_disk('cs_index.json')
 with open('cs_docid_to_url.json', 'w') as f:
     json.dump(docid_to_url, f)
-
-# Tokens used to build index
