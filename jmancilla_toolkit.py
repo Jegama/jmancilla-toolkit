@@ -21,6 +21,7 @@ CORS(app)
 # read key from environment variable
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['OPENAI_API_KEY'] = os.environ.get('OPENAI_API_KEY')
+app.config['SERPAPI_API_KEY'] = os.environ.get('SERPAPI_API_KEY')
 
 if app.config['OPENAI_API_KEY'] is None:
     raise ValueError("OPENAI_API_KEY is not set in the environment variables.")
