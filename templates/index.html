@@ -72,6 +72,8 @@
         const userInput = document.getElementById('userInput');
         const sendButton = document.getElementById('sendButton');
 
+        messageContainer.innerHTML += `<p><b>Roku Suppport Bot:</b> Hi! I'm a conversational autonomous agent. What question do you have?</p>`;
+
         function handleEnterKey(event) {
             if (event.key === 'Enter') {
                 sendMessage();

@@ -1,6 +1,6 @@
 from flask import Flask, request, send_file, render_template, jsonify
 from flask_cors import CORS
-import qrcode, os, datetime, re, time
+import qrcode, os, datetime, re, time, random
 from io import BytesIO
 from functools import wraps
 from dotenv import load_dotenv
@@ -39,7 +39,6 @@ from typing import List, Union
 from llama_index import GPTSimpleVectorIndex, LLMPredictor
 from langchain.utilities import SerpAPIWrapper
 import pandas as pd
-import re
 
 personal_index = GPTSimpleVectorIndex.load_from_disk('index.json')
 
@@ -54,12 +53,12 @@ class SourceFormatter:
         for source_node in response.source_nodes:
             title = re.search(r'title:\s*(.*?)\s*\|', source_node.node.get_text()).group(1)
             doc_id = source_node.node.doc_id or "None"
-            source_text = f"\nSource:\nTitle: {title}\nConfidence: {source_node.score:.3f}\nURL: {docid_to_url[doc_id]}"
+            source_text = f"\nSource:\nConfidence: {source_node.score:.3f}\nTitle: {title}\nURL: {docid_to_url[doc_id]}"
             texts.append(source_text)
         return "\n".join(texts)
 
 
-template = """You are a friendly Roku customer support agent. People who talk with you might not be tech-savvy; you can break down the instructions into smaller, more manageable steps. Instead of providing a long list of actions to take, you could break down each step and explain it thoroughly in short, simple sentences. Always refer to the context of the conversation when the user follows up with another question. You have access to the following tools:
+template = """You are a friendly Roku customer support agent. People who talk with you might not be tech-savvy; you can break down the instructions into smaller, more manageable steps. For example, instead of providing a long list of actions to take, you could break down each step and explain it thoroughly in short, simple sentences. Always refer to the context of the conversation when the user follows up with another question. If the first search doesn't work, try different keywords; for example, if the user wants to change the pin, you can search for "update pin" or "reset pin." Remember, not all problems can be solved on the device; if the article mentions "my.roku.com," they need to go to that website to change something on their account. Convert all the URLs on your response in the following format `<a href="https://support.roku.com/">Roku Support Site</a>.` You have access to the following tools:
 
 {tools}
 
@@ -70,11 +69,11 @@ Thought: you should always think about what to do
 Action: the action to take should be one of [{tool_names}], but prioritize the "CS Vector Index." Please include the URL of the source you used.
 Action Input: the input to the action
 Observation: the result of the action
-... (this Thought/Action/Action Input/Observation can repeat N times)
+... (this Thought/Action/Action Input/Observation can repeat 3 times, if you don't find the answer by then, politely tell the user to connect with a human agent)
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question. Include the source from the Observation.
 
-Begin! Remember to be friendly and explain things thoroughly with simple language.
+Begin! Remember to be friendly and explain things thoroughly with simple language. ALWAYS make sure the source URL is correct. If you use "search," return the URL from the website from which you took the answer.
 
 Question: {input}
 {agent_scratchpad}"""
@@ -169,7 +168,7 @@ agent = LLMSingleActionAgent(
     allowed_tools=tool_names
 )
 
-agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=False)
+agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)
 
 ##############################################################################################################
 
@@ -221,9 +220,29 @@ def log_question(question):
     with open('questions.log', 'a') as f:
         f.write(log_entry)
 
-
-
-# Roku Customer Support FAQs
+too_short = [
+    'I am sorry, I need more context to answer your question. Can you expand on your question?', 
+    'Apologies, but I require additional context to provide an accurate response. Could you please elaborate on your question?', 
+    "I'm sorry, I could use more information to help you better. Would you mind providing more details about your question?", 
+    "My apologies, but I need a bit more background to give you a proper answer. Can you please provide more information about your query?", 
+    "Pardon me, but I need more details to effectively answer your question. Could you kindly expand on your inquiry?", 
+    "I'm sorry, I'd like to help but I need more context. Can you please share more specifics about your question?", 
+    "Excuse me, but could you please provide more information on your question? I need some additional context to answer accurately.", 
+    "My apologies, but I need a little more insight to respond to your question effectively. Would you mind elaborating on your query?", 
+    "I'm sorry, but I need more clarification to give you the best possible answer. Can you please provide more details about your question?", 
+    "I'm sorry, but I need more information to answer your question. Can you please provide more details about your question?", 
+    "Forgive me, but I need more context to offer a helpful response. Can you please expand on your question a bit more?", 
+    "I apologize, but I need further information to address your question accurately. Could you kindly give me more context?", 
+    "Sorry, but to assist you better, I need more background on your question. Can you please provide more details?", 
+    "I apologize, but I require more specifics to answer your question correctly. Would you mind sharing more context?", 
+    "My apologies, but to give you an appropriate response, I need more information. Can you please elaborate on your question?", 
+    "I'm sorry, but I need a clearer understanding of your question to provide a helpful answer. Can you please give me more context?", 
+    "Excuse me, but I'd like to request more information about your question to provide an accurate response. Can you please elaborate?", 
+    "Pardon my request, but I need more context to help you effectively. Could you kindly provide more details about your question?", 
+    "I'm sorry, but I need more information to ensure I understand your question properly. Can you please give me more context?", 
+    "My apologies, but to assist you accurately, I require more details about your question. Can you please provide more information?", 
+    "I'm sorry, but I need more context to give you a well-informed answer. Would you be so kind as to elaborate on your question?", 
+    "Excuse me, but I need additional information to provide you with the best answer. Can you please give me more context about your question?"]
 
 @app.route('/query_cs', methods=['POST'])
 def query():
@@ -232,10 +251,12 @@ def query():
 
     if not text:
         return jsonify({'error': 'No text provided'}), 400
-
-    response = agent_executor.run(text)
-    
-    return jsonify({'text': response})
+    elif len(text) < 4:
+        time.sleep(2)
+        return jsonify({'text': random.choice(too_short)}), 200
+    else:
+        response = agent_executor.run(text)
+        return jsonify({'text': response})
 
 if __name__ == '__main__':
     app.run(debug=False, threaded=True)
