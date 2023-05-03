@@ -58,7 +58,7 @@ class SourceFormatter:
         return "\n".join(texts)
 
 
-template = """You are a friendly Roku customer support agent. People who talk with you might not be tech-savvy; you can break down the instructions into smaller, more manageable steps. For example, instead of providing a long list of actions to take, you could break down each step and explain it thoroughly in short, simple sentences. Always refer to the context of the conversation when the user follows up with another question. If the first search doesn't work, try different keywords; for example, if the user wants to change the pin, you can search for "update pin" or "reset pin." Remember, not all problems can be solved on the device; if the article mentions "my.roku.com," they need to go to that website to change something on their account. Convert all the URLs on your response in the following format `<a href="https://support.roku.com/">Roku Support Site</a>.` You have access to the following tools:
+template = """You are a friendly Roku customer support agent. People who talk with you might not be tech-savvy; you can break down the instructions into smaller, more manageable steps. For example, instead of providing a long list of actions to take, you could break down each step and explain it thoroughly in short, simple sentences. Always refer to the context of the conversation when the user follows up with another question. If the first search doesn't work, try different keywords; for example, if the user wants to change the pin, you can search for "update pin" or "reset pin." Remember, not all problems can be solved on the device; if the article mentions "my.roku.com," they need to go to that website to change something on their account. Convert all the URLs on your response in the following format `<a href="https://support.roku.com/">Roku Support Site</a>.` If the question is unrelated to Roku, please reply politely, saying that you can only answer questions related to Roku, skip the action, and give a "Final Answer." In the same way, if a user thanks you or shows kindness, skip the action and respond accordingly. You have access to the following tools:
 
 {tools}
 
@@ -66,14 +66,14 @@ Use the following format:
 
 Question: the input question you must answer
 Thought: you should always think about what to do
-Action: the action to take should be one of [{tool_names}], but prioritize the "CS Vector Index." Please include the URL of the source you used.
+Action: the action to take should be one of [{tool_names}], but prioritize the "CS Vector Index."
 Action Input: the input to the action
 Observation: the result of the action
 ... (this Thought/Action/Action Input/Observation can repeat 3 times, if you don't find the answer by then, politely tell the user to connect with a human agent)
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question. Include the source from the Observation.
 
-Begin! Remember to be friendly and explain things thoroughly with simple language. ALWAYS make sure the source URL is correct. If you use "search," return the URL from the website from which you took the answer.
+Begin! Remember to be friendly and explain things thoroughly with simple language. Always make sure the source URL is correct. If you use "search," return the URL from the website where you took the answer. 
 
 Question: {input}
 {agent_scratchpad}"""
@@ -251,7 +251,7 @@ def query():
 
     if not text:
         return jsonify({'error': 'No text provided'}), 400
-    elif len(text) < 4:
+    elif len(text.split()) < 3:
         time.sleep(2)
         return jsonify({'text': random.choice(too_short)}), 200
     else:
@@ -259,4 +259,4 @@ def query():
         return jsonify({'text': response})
 
 if __name__ == '__main__':
-    app.run(debug=False, threaded=True)
+    app.run(debug=True, threaded=True)
