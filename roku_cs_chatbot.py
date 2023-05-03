@@ -12,18 +12,23 @@ import re
 from dotenv import load_dotenv
 load_dotenv()
 
-def format_source_node(response_):
+cs_index = GPTSimpleVectorIndex.load_from_disk('cs_index.json')
+
+class SourceFormatter:
+    def query(self, question):
+        response = cs_index.query(question)
         """Get formatted sources text."""
         texts = []
-        for source_node in response_.source_nodes:
+        texts.append(response.response)
+        for source_node in response.source_nodes:
             title = re.search(r'title:\s*(.*?)\s*\|', source_node.node.get_text()).group(1)
             doc_id = source_node.node.doc_id or "None"
             source_text = f"\nSource:\nTitle: {title}\nConfidence: {source_node.score:.3f}\nURL: {docid_to_url[doc_id]}"
             texts.append(source_text)
-        return "\n\n".join(texts)
+        return "\n".join(texts)
 
 
-template = """Answer the following questions as best you can, but speaking as a pirate might speak. You have access to the following tools:
+template = """You are a friendly Roku customer support agent. People who talk with you might not be tech-savvy; you can break down the instructions into smaller, more manageable steps. Instead of providing a long list of actions to take, you could break down each step and explain it thoroughly in short, simple sentences. You have access to the following tools:
 
 {tools}
 
@@ -31,14 +36,14 @@ Use the following format:
 
 Question: the input question you must answer
 Thought: you should always think about what to do
-Action: the action to take, should be one of [{tool_names}], but prioritize "CS Vector Index"
+Action: the action to take should be one of [{tool_names}], but prioritize the "CS Vector Index." Please include the URL of the source you used.
 Action Input: the input to the action
 Observation: the result of the action
 ... (this Thought/Action/Action Input/Observation can repeat N times)
 Thought: I now know the final answer
-Final Answer: the final answer to the original input question
+Final Answer: the final answer to the original input question. Include the source from the Observation.
 
-Begin! Remember to speak as a pirate when giving your final answer. Use lots of "Arg"s
+Begin! Remember to be friendly and explain things thoroughly with simple language.
 
 Question: {input}
 {agent_scratchpad}"""
@@ -67,30 +72,17 @@ class CustomPromptTemplate(BaseChatPromptTemplate):
         formatted = self.template.format(**kwargs)
         return [HumanMessage(content=formatted)]
 
-from llama_index.langchain_helpers.agents import IndexToolConfig
-
 llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, max_tokens=512))
 
 docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
-
-cs_index = GPTSimpleVectorIndex.load_from_disk('cs_index.json')
 
 from llama_index.indices.query.query_transform.base import DecomposeQueryTransform
 decompose_transform = DecomposeQueryTransform(
     llm_predictor, verbose=True
 )
-
-# define toolkit
-# cs_index_config = IndexToolConfig(
-#     index=cs_index, 
-#     name=f"CS Vector Index",
-#     description=f"useful for when you want to answer queries that require Roku Customer Support site",
-#     index_query_kwargs={"similarity_top_k": 1},
-#     tool_kwargs={"return_direct": True}
-# )
-
+formatter = SourceFormatter()
 cs_index_config = Tool(
-    func=cs_index.query, 
+    func=formatter.query, 
     name=f"CS Vector Index",
     description=f"useful for when you want to answer queries that require Roku Customer Support site"
 )
@@ -103,11 +95,6 @@ search_config = Tool(
     )
 
 tools = [cs_index_config, search_config]
-
-# toolkit = LlamaToolkit(
-#     index_configs=[cs_index_config],
-#     web_configs=[search_config]
-# )
 
 prompt = CustomPromptTemplate(
     template=template,
@@ -151,7 +138,7 @@ agent = LLMSingleActionAgent(
     allowed_tools=tool_names
 )
 
-agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)
+agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=False)
 
 
 while True:
@@ -159,20 +146,3 @@ while True:
     response = agent_executor.run(input=text_input)
     print(f'Agent: {response}')
 
-
-# memory = ConversationBufferMemory(memory_key="chat_history")
-# llm=OpenAI(temperature=0)
-# agent_chain = create_llama_chat_agent(
-#     toolkit,
-#     llm,
-#     memory=memory,
-#     agent_kwargs={'agent': AgentType.CONVERSATIONAL_REACT_DESCRIPTION, 'prompt': prompt},
-#     verbose=True
-# )
-
-# while True:
-#     text_input = input("User: ")
-#     response = agent_chain.run(input=text_input)
-#     # audio = generate(response, voice='Josh')
-#     print(f'Agent: {response}')
-#     # play(audio)
