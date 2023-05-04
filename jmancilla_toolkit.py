@@ -31,42 +31,66 @@ else:
 ##############################################################################################################
 
 from langchain.agents import Tool, AgentExecutor, LLMSingleActionAgent, AgentOutputParser
-from langchain import OpenAI, LLMChain
+from langchain import LLMChain
+from langchain.chat_models import ChatOpenAI
 from langchain.prompts import BaseChatPromptTemplate
 from langchain.schema import AgentAction, AgentFinish, HumanMessage
 from typing import List, Union
 # from elevenlabs import generate, play
-from llama_index import GPTSimpleVectorIndex, LLMPredictor
+from llama_index import GPTSimpleVectorIndex, LLMPredictor, ServiceContext
 from langchain.utilities import SerpAPIWrapper
 import pandas as pd
 
-personal_index = GPTSimpleVectorIndex.load_from_disk('index.json')
+llm_predictor = LLMPredictor(llm=ChatOpenAI(model_name="gpt-3.5-turbo"))
+service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor)
 
-cs_index = GPTSimpleVectorIndex.load_from_disk('cs_index.json')
+personal_index = GPTSimpleVectorIndex.load_from_disk('index.json', service_context=service_context)
+
+cs_index = GPTSimpleVectorIndex.load_from_disk('cs_index.json', service_context=service_context)
+error_codex_index = GPTSimpleVectorIndex.load_from_disk('error_codes_index.json', service_context=service_context)
 
 class SourceFormatter:
-    def query(self, question):
-        response = cs_index.query(question)
+    def formater(self, response, source_nodes):
         """Get formatted sources text."""
         texts = []
-        texts.append(response.response)
-        for source_node in response.source_nodes:
+        texts.append(response)
+        for source_node in source_nodes:
             title = re.search(r'title:\s*(.*?)\s*\|', source_node.node.get_text()).group(1)
             doc_id = source_node.node.doc_id or "None"
             source_text = f"\nSource:\nConfidence: {source_node.score:.3f}\nTitle: {title}\nURL: {docid_to_url[doc_id]}"
             texts.append(source_text)
         return "\n".join(texts)
+    
+    def query_cs(self, question):
+        response = cs_index.query(question)
+
+        return self.formater(response.response, response.source_nodes)
+    
+    def query_error_codes(self, question):
+        response = error_codex_index.query(question)
+        return self.formater(response.response, response.source_nodes)
+    
+    def connect_to_human(self, question):
+        return "Please connect with a human agent by going to https://support.roku.com/contactus.\nThank you for using Roku Support. Have a nice day!\n\nAnother alternative is connect with my human by email at jmancilla@roku.com or scheduling a call <a href=\"https://calendly.com/jgmancilla/phonecall\">here</a>."
 
 
-template = """You are a friendly Roku customer support agent. People who talk with you might not be tech-savvy; you can break down the instructions into smaller, more manageable steps. For example, instead of providing a long list of actions to take, you could break down each step and explain it thoroughly in short, simple sentences. Always refer to the context of the conversation when the user follows up with another question. If the first search doesn't work, try different keywords; for example, if the user wants to change the pin, you can search for "update pin" or "reset pin." Remember, not all problems can be solved on the device; if the article mentions "my.roku.com," they need to go to that website to change something on their account. Convert all the URLs on your response in the following format `<a href="https://support.roku.com/">Roku Support Site</a>.` If the question is unrelated to Roku, please reply politely, saying that you can only answer questions related to Roku, skip the action, and give a "Final Answer." In the same way, if a user thanks you or shows kindness, skip the action and respond accordingly. You have access to the following tools:
+template = """You are a friendly Roku customer support agent. People who talk with you might not be tech-savvy; you can break down the instructions into smaller, more manageable steps. For example, instead of providing a long list of actions to take, you could break down each step and explain it thoroughly in short, simple sentences. Always refer to the context of the conversation when the user follows up with another question. If the first search doesn't work, try different keywords; for example, if the user wants to change the pin, you can search for "update pin" or "reset pin." 
 
-{tools}
+Remember, not all problems can be solved on the device; if the article mentions "my.roku.com," they need to go to that website to change something on their account. Convert all the URLs on your response in the following format `<a href="https://support.roku.com/">Roku Support Site</a>.` 
+
+Here are a 4 scenarios where you need to skip the action and give a "Final Answer." Apply them in the following order:
+If a user thanks you or shows kindness, respond accordingly.
+If the question is unrelated to Roku, please reply politely, saying that you can only answer questions related to Roku. 
+If the question is only 1 or 2 words, please reply politely, saying that you need more information to help them.
+Sometimes users also have problems with their audio guide because they activated it by accident and the TV is saying what they do. If you think that's the case, ask them to press the * button on the Roku remote four times quickly. The * button is located just below the directional pad and at the right-hand side of the Roku remote. This will turn it off. And you don't need to return a URL for this answer. Please skip all and go to Final Answer.
+
+You have access to the following tools: {tools}
 
 Use the following format:
 
 Question: the input question you must answer
 Thought: you should always think about what to do
-Action: the action to take should be one of [{tool_names}], but prioritize the "CS Vector Index."
+Action: the action to take should be one of [{tool_names}]
 Action Input: the input to the action
 Observation: the result of the action
 ... (this Thought/Action/Action Input/Observation can repeat 3 times, if you don't find the answer by then, politely tell the user to connect with a human agent)
@@ -102,7 +126,7 @@ class CustomPromptTemplate(BaseChatPromptTemplate):
         formatted = self.template.format(**kwargs)
         return [HumanMessage(content=formatted)]
 
-llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, max_tokens=512))
+llm_predictor = LLMPredictor(llm=ChatOpenAI(model_name="gpt-3.5-turbo"))
 
 docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
 
@@ -112,16 +136,28 @@ decompose_transform = DecomposeQueryTransform(
 )
 formatter = SourceFormatter()
 cs_index_config = Tool(
-    func=formatter.query, 
+    func=formatter.query_cs, 
     name=f"CS Vector Index",
-    description=f"useful for when you want to answer queries that require Roku Customer Support site"
+    description=f"useful for when you want to answer queries using the official documentation on the Roku Customer Support site"
+)
+
+error_code_index_config = Tool(
+    func=formatter.query_error_codes, 
+    name=f"Error Codes Index",
+    description=f"useful for when you want to answer queries about error codes"
+)
+
+human_config = Tool(
+    func=formatter.connect_to_human,
+    name=f"Connect to Human",
+    description=f"useful for when you want to connect the user to a human agent"
 )
 
 search = SerpAPIWrapper()
 search_config = Tool(
         name = "search",
         func=search.run,
-        description="useful for when you can not find the answer on the official Roku Customer Support site. You should ask targeted questions"
+        description="useful for when you can not find the answer on the official Roku Customer Support site, only as last resort. You should ask targeted questions"
     )
 
 tools = [cs_index_config, search_config]
@@ -158,7 +194,7 @@ class CustomOutputParser(AgentOutputParser):
 output_parser = CustomOutputParser()
 
 # LLM chain consisting of the LLM and a prompt
-llm_chain = LLMChain(llm=OpenAI(temperature=0), prompt=prompt)
+llm_chain = LLMChain(llm=ChatOpenAI(model_name="gpt-3.5-turbo"), prompt=prompt)
 
 tool_names = [tool.name for tool in tools]
 agent = LLMSingleActionAgent(
@@ -220,30 +256,6 @@ def log_question(question):
     with open('questions.log', 'a') as f:
         f.write(log_entry)
 
-too_short = [
-    'I am sorry, I need more context to answer your question. Can you expand on your question?', 
-    'Apologies, but I require additional context to provide an accurate response. Could you please elaborate on your question?', 
-    "I'm sorry, I could use more information to help you better. Would you mind providing more details about your question?", 
-    "My apologies, but I need a bit more background to give you a proper answer. Can you please provide more information about your query?", 
-    "Pardon me, but I need more details to effectively answer your question. Could you kindly expand on your inquiry?", 
-    "I'm sorry, I'd like to help but I need more context. Can you please share more specifics about your question?", 
-    "Excuse me, but could you please provide more information on your question? I need some additional context to answer accurately.", 
-    "My apologies, but I need a little more insight to respond to your question effectively. Would you mind elaborating on your query?", 
-    "I'm sorry, but I need more clarification to give you the best possible answer. Can you please provide more details about your question?", 
-    "I'm sorry, but I need more information to answer your question. Can you please provide more details about your question?", 
-    "Forgive me, but I need more context to offer a helpful response. Can you please expand on your question a bit more?", 
-    "I apologize, but I need further information to address your question accurately. Could you kindly give me more context?", 
-    "Sorry, but to assist you better, I need more background on your question. Can you please provide more details?", 
-    "I apologize, but I require more specifics to answer your question correctly. Would you mind sharing more context?", 
-    "My apologies, but to give you an appropriate response, I need more information. Can you please elaborate on your question?", 
-    "I'm sorry, but I need a clearer understanding of your question to provide a helpful answer. Can you please give me more context?", 
-    "Excuse me, but I'd like to request more information about your question to provide an accurate response. Can you please elaborate?", 
-    "Pardon my request, but I need more context to help you effectively. Could you kindly provide more details about your question?", 
-    "I'm sorry, but I need more information to ensure I understand your question properly. Can you please give me more context?", 
-    "My apologies, but to assist you accurately, I require more details about your question. Can you please provide more information?", 
-    "I'm sorry, but I need more context to give you a well-informed answer. Would you be so kind as to elaborate on your question?", 
-    "Excuse me, but I need additional information to provide you with the best answer. Can you please give me more context about your question?"]
-
 @app.route('/query_cs', methods=['POST'])
 def query():
     data = request.get_json()
@@ -251,12 +263,9 @@ def query():
 
     if not text:
         return jsonify({'error': 'No text provided'}), 400
-    elif len(text.split()) < 3:
-        time.sleep(2)
-        return jsonify({'text': random.choice(too_short)}), 200
     else:
         response = agent_executor.run(text)
         return jsonify({'text': response})
 
 if __name__ == '__main__':
-    app.run(debug=True, threaded=True)
+    app.run(debug=True)
