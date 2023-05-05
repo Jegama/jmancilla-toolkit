@@ -23,16 +23,10 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['OPENAI_API_KEY'] = os.environ.get('OPENAI_API_KEY')
 app.config['SERPAPI_API_KEY'] = os.environ.get('SERPAPI_API_KEY')
 
-if app.config['OPENAI_API_KEY'] is None:
-    raise ValueError("OPENAI_API_KEY is not set in the environment variables.")
-else:
-    print("OPENAI_API_KEY loaded successfully.")
-
 ##############################################################################################################
 
 from langchain.agents import Tool, AgentExecutor, LLMSingleActionAgent, AgentOutputParser
-from langchain import LLMChain
-from langchain.chat_models import ChatOpenAI
+from langchain import OpenAI, LLMChain
 from langchain.prompts import BaseChatPromptTemplate
 from langchain.schema import AgentAction, AgentFinish, HumanMessage
 from typing import List, Union
@@ -41,7 +35,7 @@ from llama_index import GPTSimpleVectorIndex, LLMPredictor, ServiceContext
 from langchain.utilities import SerpAPIWrapper
 import pandas as pd
 
-llm_predictor = LLMPredictor(llm=ChatOpenAI(model_name="gpt-3.5-turbo"))
+llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, max_tokens=512))
 service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor)
 
 personal_index = GPTSimpleVectorIndex.load_from_disk('index.json', service_context=service_context)
@@ -55,7 +49,10 @@ class SourceFormatter:
         texts = []
         texts.append(response)
         for source_node in source_nodes:
-            title = re.search(r'title:\s*(.*?)\s*\|', source_node.node.get_text()).group(1)
+            try:
+                title = re.search(r'title:\s*(.*?)\s*\|', source_node.node.get_text()).group(1)
+            except:
+                title = "Not available"
             doc_id = source_node.node.doc_id or "None"
             source_text = f"\nSource:\nConfidence: {source_node.score:.3f}\nTitle: {title}\nURL: {docid_to_url[doc_id]}"
             texts.append(source_text)
@@ -72,17 +69,19 @@ class SourceFormatter:
     
     def connect_to_human(self, question):
         return "Please connect with a human agent by going to https://support.roku.com/contactus.\nThank you for using Roku Support. Have a nice day!\n\nAnother alternative is connect with my human by email at jmancilla@roku.com or scheduling a call <a href=\"https://calendly.com/jgmancilla/phonecall\">here</a>."
+    
+    def audio_guide(self, question):
+        return "When the screen reader shortcut is enabled, you can quickly press Star * button on Roku remote four times to turn the screen reader on or off from any screen.\n\nSource <a href=\"https://support.roku.com/article/231584647\">How to enable the text-to-speech screen reader on your Roku® streaming device</a>."
 
 
 template = """You are a friendly Roku customer support agent. People who talk with you might not be tech-savvy; you can break down the instructions into smaller, more manageable steps. For example, instead of providing a long list of actions to take, you could break down each step and explain it thoroughly in short, simple sentences. Always refer to the context of the conversation when the user follows up with another question. If the first search doesn't work, try different keywords; for example, if the user wants to change the pin, you can search for "update pin" or "reset pin." 
 
 Remember, not all problems can be solved on the device; if the article mentions "my.roku.com," they need to go to that website to change something on their account. Convert all the URLs on your response in the following format `<a href="https://support.roku.com/">Roku Support Site</a>.` 
 
-Here are a 4 scenarios where you need to skip the action and give a "Final Answer." Apply them in the following order:
-If a user thanks you or shows kindness, respond accordingly.
+Here are 3 scenarios where you must skip the action and give a "Final Answer." Apply them in the following order:
+If a user thanks you or shows kindness, skip action and respond accordingly.
 If the question is unrelated to Roku, please reply politely, saying that you can only answer questions related to Roku. 
-If the question is only 1 or 2 words, please reply politely, saying that you need more information to help them.
-Sometimes users also have problems with their audio guide because they activated it by accident and the TV is saying what they do. If you think that's the case, ask them to press the * button on the Roku remote four times quickly. The * button is located just below the directional pad and at the right-hand side of the Roku remote. This will turn it off. And you don't need to return a URL for this answer. Please skip all and go to Final Answer.
+If the question is only 1 or 2 words, please reply politely, saying you need more information to help them.
 
 You have access to the following tools: {tools}
 
@@ -93,11 +92,11 @@ Thought: you should always think about what to do
 Action: the action to take should be one of [{tool_names}]
 Action Input: the input to the action
 Observation: the result of the action
-... (this Thought/Action/Action Input/Observation can repeat 3 times, if you don't find the answer by then, politely tell the user to connect with a human agent)
+... (this Thought/Action/Action Input/Observation can repeat N times, if you don't find the answer by then, politely tell the user to connect with a human agent)
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question. Include the source from the Observation.
 
-Begin! Remember to be friendly and explain things thoroughly with simple language. Always make sure the source URL is correct. If you use "search," return the URL from the website where you took the answer. 
+Begin! Remember to be friendly and explain things thoroughly with simple language. Always make sure the source URL is correct. If you use "search," return the URL from the website where you took the answer, and tell the user you were not able to find the answer on our official documentation
 
 Question: {input}
 {agent_scratchpad}"""
@@ -126,7 +125,7 @@ class CustomPromptTemplate(BaseChatPromptTemplate):
         formatted = self.template.format(**kwargs)
         return [HumanMessage(content=formatted)]
 
-llm_predictor = LLMPredictor(llm=ChatOpenAI(model_name="gpt-3.5-turbo"))
+llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, max_tokens=512))
 
 docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
 
@@ -153,6 +152,12 @@ human_config = Tool(
     description=f"useful for when you want to connect the user to a human agent"
 )
 
+audio_guide_config = Tool(
+    func=formatter.audio_guide,
+    name=f"Audio Guide",
+    description=f"useful for when you want to answer queries about the audio guide, the screen reader, or when the participant says that the TV is talking to them"
+)
+
 search = SerpAPIWrapper()
 search_config = Tool(
         name = "search",
@@ -160,7 +165,7 @@ search_config = Tool(
         description="useful for when you can not find the answer on the official Roku Customer Support site, only as last resort. You should ask targeted questions"
     )
 
-tools = [cs_index_config, search_config]
+tools = [cs_index_config, error_code_index_config, audio_guide_config, human_config, search_config]
 
 prompt = CustomPromptTemplate(
     template=template,
@@ -194,7 +199,7 @@ class CustomOutputParser(AgentOutputParser):
 output_parser = CustomOutputParser()
 
 # LLM chain consisting of the LLM and a prompt
-llm_chain = LLMChain(llm=ChatOpenAI(model_name="gpt-3.5-turbo"), prompt=prompt)
+llm_chain = LLMChain(llm=OpenAI(temperature=0), prompt=prompt)
 
 tool_names = [tool.name for tool in tools]
 agent = LLMSingleActionAgent(
