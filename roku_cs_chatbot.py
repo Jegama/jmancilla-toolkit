@@ -11,8 +11,9 @@ from llama_index import (
 )
 from llama_index.indices.loading import load_index_from_storage
 from llama_index import StorageContext
-from llama_index.indices.document_summary import DocumentSummaryIndexRetriever
+from llama_index.indices.document_summary import DocumentSummaryIndexEmbeddingRetriever
 from llama_index.query_engine import RetrieverQueryEngine
+from llama_index.optimization.optimizer import SentenceEmbeddingOptimizer
 
 from langchain.chat_models import ChatOpenAI
 from langchain.utilities import SerpAPIWrapper
@@ -24,7 +25,7 @@ load_dotenv()
 
 llm_predictor_chatgpt = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo"))
 service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor_chatgpt, chunk_size_limit=1024)
-response_synthesizer = ResponseSynthesizer.from_args()
+response_synthesizer = ResponseSynthesizer.from_args(optimizer=SentenceEmbeddingOptimizer(percentile_cutoff=0.3))
 
 # personal_index = GPTVectorStoreIndex.load_from_disk('index.json', service_context=service_context)
 
@@ -34,40 +35,37 @@ docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
 print("Loading index from storage...")
 cs_storage_context = StorageContext.from_defaults(persist_dir="cs_index")
 cs_index = load_index_from_storage(cs_storage_context)
-cs_retriever = DocumentSummaryIndexRetriever(
-    cs_index,
-    service_context=service_context
+cs_retriever = DocumentSummaryIndexEmbeddingRetriever(
+    cs_index
 )
 cs_query_engine = RetrieverQueryEngine(
     retriever=cs_retriever,
     response_synthesizer=response_synthesizer,
 )
-# cs_query_engine = cs_index.as_query_engine(response_mode="tree_summarize", use_async=True)
 
 error_storage_context = StorageContext.from_defaults(persist_dir="error_codes_index")
 error_codes_index = load_index_from_storage(error_storage_context)
-error_codes_retriever = DocumentSummaryIndexRetriever(
-    error_codes_index,
-    service_context=service_context
+error_codes_retriever = DocumentSummaryIndexEmbeddingRetriever(
+    error_codes_index
 )
 error_codes_query_engine = RetrieverQueryEngine(
     retriever=error_codes_retriever,
     response_synthesizer=response_synthesizer,
 )
-# error_codes_query_engine = error_codes_index.as_query_engine(response_mode="tree_summarize", use_async=True)
 
 class SourceFormatter:
     def formater(self, response, source_nodes):
         """Get formatted sources text."""
         texts = []
         texts.append(response)
-        for source_node in source_nodes:
-            try:
-                title = source_node.node.text.split('\n')[0]
-            except:
-                title = "Not available"
+        for source_node in source_nodes[:3]:
+            title = source_node.node.text.split('\n')[0]
             doc_id = source_node.node.doc_id or "None"
-            source_text = f"\nSource:\nConfidence: {source_node.score:.3f}\nTitle: \nURL: <a href=\"{title}\">{docid_to_url[doc_id]}</a>"
+            try:
+                # TODO add score
+                source_text = f"\nSource:\nURL: <a href=\"{docid_to_url[doc_id]}\">{title}</a>"
+            except:
+                source_text = f"\nSource:\nFirst line: {title} \nDocID: {doc_id}"
             texts.append(source_text)
         return "\n".join(texts)
     
@@ -81,7 +79,7 @@ class SourceFormatter:
         return self.formater(response.response, response.source_nodes)
     
     def connect_to_human(self, question):
-        return "Please connect with a human agent by going to https://support.roku.com/contactus.\nThank you for using Roku Support. Have a nice day!\n\nAnother alternative is connect with my human by email at jmancilla@roku.com or scheduling a call <a href=\"https://jmancilla.as.me/\">here</a>."
+        return "Please connect with a human agent by going to https://support.roku.com/contactus.\nThank you for using Roku Support. Have a nice day!\n\nAnother alternative is connect with my human by email at jmancilla@roku.com or scheduling a call <a href=\"https://calendly.com/jgmancilla/phonecall\">here</a>."
     
     def audio_guide(self, question):
         return "When the screen reader shortcut is enabled, you can quickly press Star * button on Roku remote four times to turn the screen reader on or off from any screen.\n\nSource <a href=\"https://support.roku.com/article/231584647\">How to enable the text-to-speech screen reader on your Roku® streaming device</a>."
@@ -107,8 +105,7 @@ Thought: you should always think about what to do
 Action: the action to take should be one of [{tool_names}]
 Action Input: the input to the action
 Observation: the result of the action
-Criticism: investigate the Observation, think of possible flaws and faulty logic, and how to improve it
-... (this Thought/Action/Action Input/Observation/Criticism can repeat N times, if you don't find the answer by then, politely tell the user to connect with a human agent)
+... (this Thought/Action/Action Input/Observation can repeat N times, if you don't find the answer by then, politely tell the user to connect with a human agent)
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question. Include the source from the Observation.
 
@@ -129,9 +126,10 @@ class CustomPromptTemplate(BaseChatPromptTemplate):
         # Format them in a particular way
         intermediate_steps = kwargs.pop("intermediate_steps")
         thoughts = ""
-        for action, observation, criticism in intermediate_steps:
+        # TODO add criticism to the agent
+        for action, observation in intermediate_steps:
             thoughts += action.log
-            thoughts += f"\nObservation: {observation}\nCriticism: {criticism}\nThought: "
+            thoughts += f"\nObservation: {observation}\nThought: "
         # Set the agent_scratchpad variable to that value
         kwargs["agent_scratchpad"] = thoughts
         # Create a tools variable from the list of tools provided

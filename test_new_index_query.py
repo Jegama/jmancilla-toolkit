@@ -6,9 +6,11 @@ from llama_index import (
 import re
 from llama_index.indices.loading import load_index_from_storage
 from llama_index import StorageContext
-from llama_index.indices.document_summary import DocumentSummaryIndexRetriever
+from llama_index.indices.document_summary import DocumentSummaryIndexEmbeddingRetriever
 from llama_index.query_engine import RetrieverQueryEngine
 from llama_index.optimization.optimizer import SentenceEmbeddingOptimizer
+import nest_asyncio, time
+nest_asyncio.apply()
 
 from langchain.chat_models import ChatOpenAI
 import pandas as pd
@@ -17,7 +19,7 @@ load_dotenv()
 
 llm_predictor_chatgpt = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo"))
 service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor_chatgpt, chunk_size_limit=1024)
-response_synthesizer = ResponseSynthesizer.from_args()
+response_synthesizer = ResponseSynthesizer.from_args(optimizer=SentenceEmbeddingOptimizer(percentile_cutoff=0.5))
 
 # personal_index = GPTVectorStoreIndex.load_from_disk('index.json', service_context=service_context)
 
@@ -27,27 +29,23 @@ docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
 print("Loading index from storage...")
 cs_storage_context = StorageContext.from_defaults(persist_dir="cs_index")
 cs_index = load_index_from_storage(cs_storage_context)
-# cs_retriever = DocumentSummaryIndexRetriever(
-#     cs_index,
-#     service_context=service_context
-# )
-# cs_query_engine = RetrieverQueryEngine(
-#     retriever=cs_retriever,
-#     response_synthesizer=response_synthesizer,
-# )
-cs_query_engine = cs_index.as_query_engine(response_mode="tree_summarize", use_async=True, optimizer=SentenceEmbeddingOptimizer(threshold_cutoff=0.8))
+cs_retriever = DocumentSummaryIndexEmbeddingRetriever(
+    cs_index
+)
+cs_query_engine = RetrieverQueryEngine(
+    retriever=cs_retriever,
+    response_synthesizer=response_synthesizer,
+)
 
 error_storage_context = StorageContext.from_defaults(persist_dir="error_codes_index")
 error_codes_index = load_index_from_storage(error_storage_context)
-# error_codes_retriever = DocumentSummaryIndexRetriever(
-#     error_codes_index,
-#     service_context=service_context
-# )
-# error_codes_query_engine = RetrieverQueryEngine(
-#     retriever=error_codes_retriever,
-#     response_synthesizer=response_synthesizer,
-# )
-error_codes_query_engine = error_codes_index.as_query_engine(response_mode="tree_summarize", use_async=True,optimizer=SentenceEmbeddingOptimizer(threshold_cutoff=0.8))
+error_codes_retriever = DocumentSummaryIndexEmbeddingRetriever(
+    error_codes_index
+)
+error_codes_query_engine = RetrieverQueryEngine(
+    retriever=error_codes_retriever,
+    response_synthesizer=response_synthesizer,
+)
 
 class SourceFormatter:
     def formater(self, response, source_nodes):
@@ -55,12 +53,13 @@ class SourceFormatter:
         texts = []
         texts.append(response)
         for source_node in source_nodes[:3]:
-            try:
-                title = source_node.node.text.split('\n')[0]
-            except:
-                title = "Not available"
+            title = source_node.node.text.split('\n')[0]
             doc_id = source_node.node.doc_id or "None"
-            source_text = f"\nSource:\nConfidence: {source_node.score:.3f}\nTitle: \nURL: <a href=\"{title}\">{docid_to_url[doc_id]}</a>"
+            try:
+                # TODO add score
+                source_text = f"\nSource:\nURL: <a href=\"{docid_to_url[doc_id]}\">{title}</a>"
+            except:
+                source_text = f"\nSource:\nFirst line: {title} \nDocID: {doc_id}"
             texts.append(source_text)
         return "\n".join(texts)
     
@@ -82,6 +81,8 @@ class SourceFormatter:
 
 print("Querying...")
 formatter = SourceFormatter()
-response = formatter.query_cs('How do I pair my remote?')
 
+start = time.time()
+response = formatter.query_cs('How do I pair my remote?')
 print(response)
+print(f"Query took {time.time() - start} seconds\n")
