@@ -31,17 +31,53 @@ from langchain.prompts import BaseChatPromptTemplate
 from langchain.schema import AgentAction, AgentFinish, HumanMessage
 from typing import List, Union
 # from elevenlabs import generate, play
-from llama_index import GPTSimpleVectorIndex, LLMPredictor, ServiceContext
+from llama_index import (
+    LLMPredictor,
+    ServiceContext,
+    ResponseSynthesizer
+)
+from llama_index.indices.loading import load_index_from_storage
+from llama_index import StorageContext
+from llama_index.indices.document_summary import DocumentSummaryIndexRetriever
+from llama_index.query_engine import RetrieverQueryEngine
+
+from langchain.chat_models import ChatOpenAI
 from langchain.utilities import SerpAPIWrapper
 import pandas as pd
+import re
 
-llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, max_tokens=512))
-service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor)
+llm_predictor_chatgpt = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo"))
+service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor_chatgpt, chunk_size_limit=1024)
+response_synthesizer = ResponseSynthesizer.from_args()
 
-personal_index = GPTSimpleVectorIndex.load_from_disk('index.json', service_context=service_context)
+# personal_index = GPTVectorStoreIndex.load_from_disk('index.json', service_context=service_context)
 
-cs_index = GPTSimpleVectorIndex.load_from_disk('cs_index.json', service_context=service_context)
-error_codex_index = GPTSimpleVectorIndex.load_from_disk('error_codes_index.json', service_context=service_context)
+docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
+
+# rebuild storage context
+cs_storage_context = StorageContext.from_defaults(persist_dir="cs_index")
+cs_index = load_index_from_storage(cs_storage_context)
+cs_retriever = DocumentSummaryIndexRetriever(
+    cs_index,
+    service_context=service_context
+)
+cs_query_engine = RetrieverQueryEngine(
+    retriever=cs_retriever,
+    response_synthesizer=response_synthesizer,
+)
+# cs_query_engine = cs_index.as_query_engine(response_mode="tree_summarize", use_async=True)
+
+error_storage_context = StorageContext.from_defaults(persist_dir="error_codes_index")
+error_codes_index = load_index_from_storage(error_storage_context)
+error_codes_retriever = DocumentSummaryIndexRetriever(
+    error_codes_index,
+    service_context=service_context
+)
+error_codes_query_engine = RetrieverQueryEngine(
+    retriever=error_codes_retriever,
+    response_synthesizer=response_synthesizer,
+)
+# error_codes_query_engine = error_codes_index.as_query_engine(response_mode="tree_summarize", use_async=True)
 
 class SourceFormatter:
     def formater(self, response, source_nodes):
@@ -50,7 +86,7 @@ class SourceFormatter:
         texts.append(response)
         for source_node in source_nodes:
             try:
-                title = re.search(r'title:\s*(.*?)\s*\|', source_node.node.get_text()).group(1)
+                title = source_node.node.text.split('\n')[0]
             except:
                 title = "Not available"
             doc_id = source_node.node.doc_id or "None"
@@ -59,12 +95,12 @@ class SourceFormatter:
         return "\n".join(texts)
     
     def query_cs(self, question):
-        response = cs_index.query(question)
+        response = cs_query_engine.query(question)
 
         return self.formater(response.response, response.source_nodes)
     
     def query_error_codes(self, question):
-        response = error_codex_index.query(question)
+        response = error_codes_query_engine.query(question)
         return self.formater(response.response, response.source_nodes)
     
     def connect_to_human(self, question):
@@ -72,7 +108,6 @@ class SourceFormatter:
     
     def audio_guide(self, question):
         return "When the screen reader shortcut is enabled, you can quickly press Star * button on Roku remote four times to turn the screen reader on or off from any screen.\n\nSource <a href=\"https://support.roku.com/article/231584647\">How to enable the text-to-speech screen reader on your Roku® streaming device</a>."
-
 
 template = """You are a friendly Roku customer support agent. People who talk with you might not be tech-savvy; you can break down the instructions into smaller, more manageable steps. For example, instead of providing a long list of actions to take, you could break down each step and explain it thoroughly in short, simple sentences. Always refer to the context of the conversation when the user follows up with another question. If the first search doesn't work, try different keywords; for example, if the user wants to change the pin, you can search for "update pin" or "reset pin." 
 

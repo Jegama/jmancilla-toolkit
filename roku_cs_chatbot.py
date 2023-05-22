@@ -4,7 +4,17 @@ from langchain.prompts import BaseChatPromptTemplate
 from langchain.schema import AgentAction, AgentFinish, HumanMessage
 from typing import List, Union
 # from elevenlabs import generate, play
-from llama_index import GPTSimpleVectorIndex, LLMPredictor
+from llama_index import (
+    LLMPredictor,
+    ServiceContext,
+    ResponseSynthesizer
+)
+from llama_index.indices.loading import load_index_from_storage
+from llama_index import StorageContext
+from llama_index.indices.document_summary import DocumentSummaryIndexRetriever
+from llama_index.query_engine import RetrieverQueryEngine
+
+from langchain.chat_models import ChatOpenAI
 from langchain.utilities import SerpAPIWrapper
 import pandas as pd
 import re
@@ -12,38 +22,97 @@ import re
 from dotenv import load_dotenv
 load_dotenv()
 
-cs_index = GPTSimpleVectorIndex.load_from_disk('cs_index.json')
+llm_predictor_chatgpt = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo"))
+service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor_chatgpt, chunk_size_limit=1024)
+response_synthesizer = ResponseSynthesizer.from_args()
+
+# personal_index = GPTVectorStoreIndex.load_from_disk('index.json', service_context=service_context)
+
+docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
+
+# rebuild storage context
+print("Loading index from storage...")
+cs_storage_context = StorageContext.from_defaults(persist_dir="cs_index")
+cs_index = load_index_from_storage(cs_storage_context)
+cs_retriever = DocumentSummaryIndexRetriever(
+    cs_index,
+    service_context=service_context
+)
+cs_query_engine = RetrieverQueryEngine(
+    retriever=cs_retriever,
+    response_synthesizer=response_synthesizer,
+)
+# cs_query_engine = cs_index.as_query_engine(response_mode="tree_summarize", use_async=True)
+
+error_storage_context = StorageContext.from_defaults(persist_dir="error_codes_index")
+error_codes_index = load_index_from_storage(error_storage_context)
+error_codes_retriever = DocumentSummaryIndexRetriever(
+    error_codes_index,
+    service_context=service_context
+)
+error_codes_query_engine = RetrieverQueryEngine(
+    retriever=error_codes_retriever,
+    response_synthesizer=response_synthesizer,
+)
+# error_codes_query_engine = error_codes_index.as_query_engine(response_mode="tree_summarize", use_async=True)
 
 class SourceFormatter:
-    def query(self, question):
-        response = cs_index.query(question)
+    def formater(self, response, source_nodes):
         """Get formatted sources text."""
         texts = []
-        texts.append(response.response)
-        for source_node in response.source_nodes:
-            title = re.search(r'title:\s*(.*?)\s*\|', source_node.node.get_text()).group(1)
+        texts.append(response)
+        for source_node in source_nodes:
+            try:
+                title = source_node.node.text.split('\n')[0]
+            except:
+                title = "Not available"
             doc_id = source_node.node.doc_id or "None"
-            source_text = f"\nSource:\nTitle: {title}\nConfidence: {source_node.score:.3f}\nURL: {docid_to_url[doc_id]}"
+            source_text = f"\nSource:\nConfidence: {source_node.score:.3f}\nTitle: \nURL: <a href=\"{title}\">{docid_to_url[doc_id]}</a>"
             texts.append(source_text)
         return "\n".join(texts)
+    
+    def query_cs(self, question):
+        response = cs_query_engine.query(question)
+
+        return self.formater(response.response, response.source_nodes)
+    
+    def query_error_codes(self, question):
+        response = error_codes_query_engine.query(question)
+        return self.formater(response.response, response.source_nodes)
+    
+    def connect_to_human(self, question):
+        return "Please connect with a human agent by going to https://support.roku.com/contactus.\nThank you for using Roku Support. Have a nice day!\n\nAnother alternative is connect with my human by email at jmancilla@roku.com or scheduling a call <a href=\"https://jmancilla.as.me/\">here</a>."
+    
+    def audio_guide(self, question):
+        return "When the screen reader shortcut is enabled, you can quickly press Star * button on Roku remote four times to turn the screen reader on or off from any screen.\n\nSource <a href=\"https://support.roku.com/article/231584647\">How to enable the text-to-speech screen reader on your Roku® streaming device</a>."
 
 
-template = """You are a friendly Roku customer support agent. People who talk with you might not be tech-savvy; you can break down the instructions into smaller, more manageable steps. Instead of providing a long list of actions to take, you could break down each step and explain it thoroughly in short, simple sentences. You have access to the following tools:
+template = """You are a friendly Roku customer support agent. People who talk with you might not be tech-savvy; you can break down the instructions into smaller, more manageable steps. For example, instead of providing a long list of actions to take, you could break down each step and explain it thoroughly in short, simple sentences. Always refer to the context of the conversation when the user follows up with another question. If the first search doesn't work, try different keywords; for example, if the user wants to change the pin, you can search for "update pin" or "reset pin." 
 
-{tools}
+The "CS Vector Index" articles might have solutions for different devices. If you are unsure what device the user is talking about, please ask for clarification.
+
+Remember, not all problems can be solved on the device; if the article mentions "my.roku.com," they need to go to that website to change something on their account. Convert all the URLs on your response in the following format `<a href="https://support.roku.com/">Roku Support Site</a>.` 
+
+Here are 3 scenarios where you must skip the action and give a "Final Answer." Apply them in the following order:
+If a user thanks you or shows kindness, skip action and respond accordingly.
+If the question is unrelated to Roku, please reply politely, saying that you can only answer questions related to Roku. 
+If the question is only 1 or 2 words, please reply politely, saying you need more information to help them.
+
+You have access to the following tools: {tools}
 
 Use the following format:
 
 Question: the input question you must answer
 Thought: you should always think about what to do
-Action: the action to take should be one of [{tool_names}], but prioritize the "CS Vector Index." Please include the URL of the source you used.
+Action: the action to take should be one of [{tool_names}]
 Action Input: the input to the action
 Observation: the result of the action
-... (this Thought/Action/Action Input/Observation can repeat N times)
+Criticism: investigate the Observation, think of possible flaws and faulty logic, and how to improve it
+... (this Thought/Action/Action Input/Observation/Criticism can repeat N times, if you don't find the answer by then, politely tell the user to connect with a human agent)
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question. Include the source from the Observation.
 
-Begin! Remember to be friendly and explain things thoroughly with simple language.
+Begin! Remember to be friendly and explain things thoroughly with simple language. Always make sure the source URL is correct. If you use "search," return the URL from the website where you took the answer, and tell the user you could not find the answer on our official documentation. Let's think step by step to ensure we have the correct answer.
 
 Question: {input}
 {agent_scratchpad}"""
@@ -60,9 +129,9 @@ class CustomPromptTemplate(BaseChatPromptTemplate):
         # Format them in a particular way
         intermediate_steps = kwargs.pop("intermediate_steps")
         thoughts = ""
-        for action, observation in intermediate_steps:
+        for action, observation, criticism in intermediate_steps:
             thoughts += action.log
-            thoughts += f"\nObservation: {observation}\nThought: "
+            thoughts += f"\nObservation: {observation}\nCriticism: {criticism}\nThought: "
         # Set the agent_scratchpad variable to that value
         kwargs["agent_scratchpad"] = thoughts
         # Create a tools variable from the list of tools provided
@@ -82,19 +151,37 @@ decompose_transform = DecomposeQueryTransform(
 )
 formatter = SourceFormatter()
 cs_index_config = Tool(
-    func=formatter.query, 
+    func=formatter.query_cs, 
     name=f"CS Vector Index",
-    description=f"useful for when you want to answer queries that require Roku Customer Support site"
+    description=f"Your primary tool, useful for when you want to answer queries using the official documentation on the Roku Customer Support site"
+)
+
+error_code_index_config = Tool(
+    func=formatter.query_error_codes, 
+    name=f"Error Codes Index",
+    description=f"useful for when you want to answer queries about error codes"
+)
+
+human_config = Tool(
+    func=formatter.connect_to_human,
+    name=f"Connect to Human",
+    description=f"useful for when you want to connect the user to a human agent"
+)
+
+audio_guide_config = Tool(
+    func=formatter.audio_guide,
+    name=f"Audio Guide",
+    description=f"useful for when you want to answer queries about the audio guide, the screen reader, or when the participant says that the TV is talking to them"
 )
 
 search = SerpAPIWrapper()
 search_config = Tool(
         name = "search",
         func=search.run,
-        description="useful for when you can not find the answer on the official Roku Customer Support site. You should ask targeted questions"
+        description="This is your last resort, useful when you can not find the answer on the official Roku Customer Support site. You should ask targeted questions"
     )
 
-tools = [cs_index_config, search_config]
+tools = [cs_index_config, error_code_index_config, audio_guide_config, human_config, search_config]
 
 prompt = CustomPromptTemplate(
     template=template,
@@ -138,7 +225,7 @@ agent = LLMSingleActionAgent(
     allowed_tools=tool_names
 )
 
-agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=False)
+agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)
 
 
 while True:
