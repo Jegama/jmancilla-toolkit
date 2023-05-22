@@ -308,7 +308,7 @@ def query():
         return jsonify({'error': 'No text provided'}), 400
     else:
         response = agent_executor.run(text)
-        return jsonify({'text': response})
+        return 
     
 @app.route('/spotlight', methods=['POST'])
 def query_spotlight():
@@ -318,7 +318,8 @@ def query_spotlight():
     if not text:
         return jsonify({'error': 'No text provided'}), 400
     else:
-        return formatter.query_cs(text)
+        response = formatter.query_cs(text)
+        return jsonify({'text': response})
 
 if __name__ == '__main__':
     app.run(debug=True)
