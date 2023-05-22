@@ -31,41 +31,76 @@ from langchain.prompts import BaseChatPromptTemplate
 from langchain.schema import AgentAction, AgentFinish, HumanMessage
 from typing import List, Union
 # from elevenlabs import generate, play
-from llama_index import GPTSimpleVectorIndex, LLMPredictor, ServiceContext
+from llama_index import (
+    LLMPredictor,
+    ServiceContext,
+    ResponseSynthesizer
+)
+from llama_index.indices.loading import load_index_from_storage
+from llama_index import StorageContext
+from llama_index.indices.document_summary import DocumentSummaryIndexEmbeddingRetriever
+from llama_index.query_engine import RetrieverQueryEngine
+from llama_index.optimization.optimizer import SentenceEmbeddingOptimizer
+
+from langchain.chat_models import ChatOpenAI
 from langchain.utilities import SerpAPIWrapper
 import pandas as pd
+import re
 
-llm_predictor = LLMPredictor(llm=OpenAI(temperature=0, max_tokens=512))
-service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor)
+llm_predictor_chatgpt = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo"))
+service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor_chatgpt, chunk_size_limit=1024)
+response_synthesizer = ResponseSynthesizer.from_args(optimizer=SentenceEmbeddingOptimizer(percentile_cutoff=0.3))
 
-personal_index = GPTSimpleVectorIndex.load_from_disk('index.json', service_context=service_context)
+# personal_index = GPTVectorStoreIndex.load_from_disk('index.json', service_context=service_context)
 
-cs_index = GPTSimpleVectorIndex.load_from_disk('cs_index.json', service_context=service_context)
-error_codex_index = GPTSimpleVectorIndex.load_from_disk('error_codes_index.json', service_context=service_context)
+docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
+
+# rebuild storage context
+print("Loading index from storage...")
+cs_storage_context = StorageContext.from_defaults(persist_dir="cs_index")
+cs_index = load_index_from_storage(cs_storage_context)
+cs_retriever = DocumentSummaryIndexEmbeddingRetriever(
+    cs_index
+)
+cs_query_engine = RetrieverQueryEngine(
+    retriever=cs_retriever,
+    response_synthesizer=response_synthesizer,
+)
+
+error_storage_context = StorageContext.from_defaults(persist_dir="error_codes_index")
+error_codes_index = load_index_from_storage(error_storage_context)
+error_codes_retriever = DocumentSummaryIndexEmbeddingRetriever(
+    error_codes_index
+)
+error_codes_query_engine = RetrieverQueryEngine(
+    retriever=error_codes_retriever,
+    response_synthesizer=response_synthesizer,
+)
 
 class SourceFormatter:
-    def formater(self, response, source_nodes):
+    def formatter(self, response, source_nodes):
         """Get formatted sources text."""
         texts = []
         texts.append(response)
-        for source_node in source_nodes:
-            try:
-                title = re.search(r'title:\s*(.*?)\s*\|', source_node.node.get_text()).group(1)
-            except:
-                title = "Not available"
+        for source_node in source_nodes[:3]:
+            title = source_node.node.text.split('\n')[0]
             doc_id = source_node.node.doc_id or "None"
-            source_text = f"\nSource:\nConfidence: {source_node.score:.3f}\nTitle: {title}\nURL: {docid_to_url[doc_id]}"
+            try:
+                # TODO add score
+                source_text = f"\nSource:\nURL: <a href=\"{docid_to_url[doc_id]}\">{title}</a>"
+            except:
+                source_text = f"\nSource:\nFirst line: {title} \nDocID: {doc_id}"
             texts.append(source_text)
         return "\n".join(texts)
     
     def query_cs(self, question):
-        response = cs_index.query(question)
+        response = cs_query_engine.query(question)
 
-        return self.formater(response.response, response.source_nodes)
+        return self.formatter(response.response, response.source_nodes)
     
     def query_error_codes(self, question):
-        response = error_codex_index.query(question)
-        return self.formater(response.response, response.source_nodes)
+        response = error_codes_query_engine.query(question)
+        return self.formatter(response.response, response.source_nodes)
     
     def connect_to_human(self, question):
         return "Please connect with a human agent by going to https://support.roku.com/contactus.\nThank you for using Roku Support. Have a nice day!\n\nAnother alternative is connect with my human by email at jmancilla@roku.com or scheduling a call <a href=\"https://calendly.com/jgmancilla/phonecall\">here</a>."
@@ -75,6 +110,8 @@ class SourceFormatter:
 
 
 template = """You are a friendly Roku customer support agent. People who talk with you might not be tech-savvy; you can break down the instructions into smaller, more manageable steps. For example, instead of providing a long list of actions to take, you could break down each step and explain it thoroughly in short, simple sentences. Always refer to the context of the conversation when the user follows up with another question. If the first search doesn't work, try different keywords; for example, if the user wants to change the pin, you can search for "update pin" or "reset pin." 
+
+The "CS Vector Index" articles might have solutions for different devices. If you are unsure what device the user is talking about, please ask for clarification.
 
 Remember, not all problems can be solved on the device; if the article mentions "my.roku.com," they need to go to that website to change something on their account. Convert all the URLs on your response in the following format `<a href="https://support.roku.com/">Roku Support Site</a>.` 
 
@@ -96,7 +133,7 @@ Observation: the result of the action
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question. Include the source from the Observation.
 
-Begin! Remember to be friendly and explain things thoroughly with simple language. Always make sure the source URL is correct. If you use "search," return the URL from the website where you took the answer, and tell the user you were not able to find the answer on our official documentation
+Begin! Remember to be friendly and explain things thoroughly with simple language. Always make sure the source URL is correct. If you use "search," return the URL from the website where you took the answer, and tell the user you could not find the answer on our official documentation. Let's think step by step to ensure we have the correct answer.
 
 Question: {input}
 {agent_scratchpad}"""
@@ -113,6 +150,7 @@ class CustomPromptTemplate(BaseChatPromptTemplate):
         # Format them in a particular way
         intermediate_steps = kwargs.pop("intermediate_steps")
         thoughts = ""
+        # TODO add criticism to the agent
         for action, observation in intermediate_steps:
             thoughts += action.log
             thoughts += f"\nObservation: {observation}\nThought: "
@@ -137,7 +175,7 @@ formatter = SourceFormatter()
 cs_index_config = Tool(
     func=formatter.query_cs, 
     name=f"CS Vector Index",
-    description=f"useful for when you want to answer queries using the official documentation on the Roku Customer Support site"
+    description=f"Your primary tool, useful for when you want to answer queries using the official documentation on the Roku Customer Support site"
 )
 
 error_code_index_config = Tool(
@@ -162,7 +200,7 @@ search = SerpAPIWrapper()
 search_config = Tool(
         name = "search",
         func=search.run,
-        description="useful for when you can not find the answer on the official Roku Customer Support site, only as last resort. You should ask targeted questions"
+        description="This is your last resort, useful when you can not find the answer on the official Roku Customer Support site. You should ask targeted questions"
     )
 
 tools = [cs_index_config, error_code_index_config, audio_guide_config, human_config, search_config]
@@ -271,6 +309,16 @@ def query():
     else:
         response = agent_executor.run(text)
         return jsonify({'text': response})
+    
+@app.route('/spotlight', methods=['POST'])
+def query_spotlight():
+    data = request.get_json()
+    text = data.get('text', '')
+
+    if not text:
+        return jsonify({'error': 'No text provided'}), 400
+    else:
+        return formatter.query_cs(text)
 
 if __name__ == '__main__':
     app.run(debug=True)
