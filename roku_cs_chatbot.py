@@ -15,6 +15,7 @@ from llama_index.indices.document_summary import DocumentSummaryIndexEmbeddingRe
 from llama_index.query_engine import RetrieverQueryEngine
 from llama_index.optimization.optimizer import SentenceEmbeddingOptimizer
 
+from langchain.memory import ChatMessageHistory
 from langchain.chat_models import ChatOpenAI
 from langchain.utilities import SerpAPIWrapper
 import pandas as pd
@@ -23,7 +24,7 @@ import re
 from dotenv import load_dotenv
 load_dotenv()
 
-llm_predictor_chatgpt = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo"))
+llm_predictor_chatgpt = LLMPredictor(llm=ChatOpenAI(temperature=1, model_name="gpt-3.5-turbo"))
 service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor_chatgpt, chunk_size_limit=1024)
 response_synthesizer = ResponseSynthesizer.from_args(optimizer=SentenceEmbeddingOptimizer(percentile_cutoff=0.3))
 
@@ -54,6 +55,9 @@ error_codes_query_engine = RetrieverQueryEngine(
 )
 
 class SourceFormatter:
+    def __init__(self):
+        self.history = ChatMessageHistory()
+
     def formater(self, response, source_nodes):
         """Get formatted sources text."""
         texts = []
@@ -69,6 +73,11 @@ class SourceFormatter:
             texts.append(source_text)
         return "\n".join(texts)
     
+    def update_history(self, question, response):
+        """Update conversation history."""
+        self.history.add_user_message(question)
+        self.history.add_ai_message(response)
+    
     def query_cs(self, question):
         response = cs_query_engine.query(question)
 
@@ -83,11 +92,13 @@ class SourceFormatter:
     
     def audio_guide(self, question):
         return "When the screen reader shortcut is enabled, you can quickly press Star * button on Roku remote four times to turn the screen reader on or off from any screen.\n\nSource <a href=\"https://support.roku.com/article/231584647\">How to enable the text-to-speech screen reader on your Roku® streaming device</a>."
+    
+    def conversation_hist(self, question):
+        return self.history.messages
 
+# If the first search doesn't work, try different keywords; for example, if the user wants to change the pin, you can search for "update pin" or "reset pin." 
 
-template = """You are a friendly Roku customer support agent. People who talk with you might not be tech-savvy; you can break down the instructions into smaller, more manageable steps. For example, instead of providing a long list of actions to take, you could break down each step and explain it thoroughly in short, simple sentences. Always refer to the context of the conversation when the user follows up with another question. If the first search doesn't work, try different keywords; for example, if the user wants to change the pin, you can search for "update pin" or "reset pin." 
-
-The "CS Vector Index" articles might have solutions for different devices. If you are unsure what device the user is talking about, please ask for clarification.
+template = """You are a friendly Roku customer support agent. People who talk with you might not be tech-savvy; you can break down the instructions into smaller, more manageable steps. For example, instead of providing a long list of actions to take, you could break down each step and explain it thoroughly in short, simple sentences. Always refer to the conversation history when the user follows up with another question or you think the user is refering to a previous question. The "CS Vector Index" articles might have solutions for different devices. If you are unsure what device the user is talking about, please ask for clarification.
 
 Remember, not all problems can be solved on the device; if the article mentions "my.roku.com," they need to go to that website to change something on their account. Convert all the URLs on your response in the following format `<a href="https://support.roku.com/">Roku Support Site</a>.` 
 
@@ -172,6 +183,12 @@ audio_guide_config = Tool(
     description=f"useful for when you want to answer queries about the audio guide, the screen reader, or when the participant says that the TV is talking to them"
 )
 
+conversation_hist_config = Tool(
+    func=formatter.conversation_hist,
+    name=f"Conversation History",
+    description=f"useful for when you want to see the conversation history"
+)
+
 search = SerpAPIWrapper()
 search_config = Tool(
         name = "search",
@@ -179,7 +196,7 @@ search_config = Tool(
         description="This is your last resort, useful when you can not find the answer on the official Roku Customer Support site. You should ask targeted questions"
     )
 
-tools = [cs_index_config, error_code_index_config, audio_guide_config, human_config, search_config]
+tools = [cs_index_config, error_code_index_config, audio_guide_config, human_config, conversation_hist_config, search_config]
 
 prompt = CustomPromptTemplate(
     template=template,
@@ -213,7 +230,10 @@ class CustomOutputParser(AgentOutputParser):
 output_parser = CustomOutputParser()
 
 # LLM chain consisting of the LLM and a prompt
-llm_chain = LLMChain(llm=OpenAI(temperature=0), prompt=prompt)
+llm_chain = LLMChain(
+    llm=OpenAI(temperature=1), 
+    prompt=prompt,
+)
 
 tool_names = [tool.name for tool in tools]
 agent = LLMSingleActionAgent(
@@ -229,5 +249,6 @@ agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, ve
 while True:
     text_input = input("User: ")
     response = agent_executor.run(input=text_input)
+    formatter.update_history(text_input, response)
     print(f'Agent: {response}')
 

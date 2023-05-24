@@ -80,7 +80,7 @@ print(f'\nFound {len(urls)} unique urls')
 parser = SimpleNodeParser()
 
 # # LLM Predictor (gpt-3.5-turbo)
-llm_predictor_chatgpt = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo"))
+llm_predictor_chatgpt = LLMPredictor(llm=ChatOpenAI(temperature=1, model_name="gpt-3.5-turbo"))
 service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor_chatgpt, chunk_size_limit=1024)
 
 # default mode of building the index

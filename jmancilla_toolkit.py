@@ -1,4 +1,6 @@
-from flask import Flask, request, send_file, render_template, jsonify
+from flask import Flask, request, send_file, render_template, jsonify, session
+from werkzeug.local import LocalProxy
+
 from flask_cors import CORS
 import qrcode, os, datetime, re, time, random
 from io import BytesIO
@@ -42,12 +44,13 @@ from llama_index.indices.document_summary import DocumentSummaryIndexEmbeddingRe
 from llama_index.query_engine import RetrieverQueryEngine
 from llama_index.optimization.optimizer import SentenceEmbeddingOptimizer
 
+from langchain.memory import ChatMessageHistory
 from langchain.chat_models import ChatOpenAI
 from langchain.utilities import SerpAPIWrapper
 import pandas as pd
-import re
+import re, uuid, json
 
-llm_predictor_chatgpt = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo"))
+llm_predictor_chatgpt = LLMPredictor(llm=ChatOpenAI(temperature=1, model_name="gpt-3.5-turbo"))
 service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor_chatgpt, chunk_size_limit=1024)
 response_synthesizer = ResponseSynthesizer.from_args(optimizer=SentenceEmbeddingOptimizer(percentile_cutoff=0.3))
 
@@ -78,6 +81,9 @@ error_codes_query_engine = RetrieverQueryEngine(
 )
 
 class SourceFormatter:
+    def __init__(self):
+        self.history = ChatMessageHistory()
+
     def formatter(self, response, source_nodes):
         """Get formatted sources text."""
         texts = []
@@ -93,6 +99,11 @@ class SourceFormatter:
             texts.append(source_text)
         return "\n".join(texts)
     
+    def update_history(self, question, response):
+        """Update conversation history."""
+        self.history.add_user_message(question)
+        self.history.add_ai_message(response)
+    
     def query_cs(self, question):
         response = cs_query_engine.query(question)
 
@@ -107,11 +118,78 @@ class SourceFormatter:
     
     def audio_guide(self, question):
         return "When the screen reader shortcut is enabled, you can quickly press Star * button on Roku remote four times to turn the screen reader on or off from any screen.\n\nSource <a href=\"https://support.roku.com/article/231584647\">How to enable the text-to-speech screen reader on your Roku® streaming device</a>."
+    
+    def ask_device(self, question):
+        return "What device are you using?"
+    
+    def conversation_hist(self, question):
+        return self.history.messages
+    
+    def get_state(self):
+        """Return the current state of the formatter."""
+        return self.history.messages  # Return the list of messages
 
+    @classmethod
+    def from_state(cls, state):
+        """Create a new formatter from a saved state."""
+        formatter = cls()
+        formatter.history.messages = state  # Set the list of messages
+        return formatter
 
-template = """You are a friendly Roku customer support agent. People who talk with you might not be tech-savvy; you can break down the instructions into smaller, more manageable steps. For example, instead of providing a long list of actions to take, you could break down each step and explain it thoroughly in short, simple sentences. Always refer to the context of the conversation when the user follows up with another question. If the first search doesn't work, try different keywords; for example, if the user wants to change the pin, you can search for "update pin" or "reset pin." 
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
+from sql_module import Formatter
 
-The "CS Vector Index" articles might have solutions for different devices. If you are unsure what device the user is talking about, please ask for clarification.
+# Create an engine that stores data in the local directory's
+# sqlalchemy_example.db file.
+engine = create_engine('sqlite:///database.db', connect_args={'check_same_thread': False})
+
+# Create a new session
+Session = sessionmaker(bind=engine)
+
+def save_formatter(user_id, formatter):
+    with Session() as db_session:
+        formatter_row = db_session.query(Formatter).filter_by(user_id=user_id).first()
+        if formatter_row is not None:
+            # Update the existing row with the new state
+            formatter_row.history = json.dumps(formatter.get_state())  # Serialize the state to a JSON string
+        else:
+            # This is a new user, so create a new row
+            formatter_row = Formatter(user_id=user_id, history=json.dumps(formatter.get_state()))  # Serialize the state to a JSON string
+            db_session.add(formatter_row)
+        db_session.commit()
+
+def get_formatter(user_id):
+    with Session() as db_session:
+        formatter_row = db_session.query(Formatter).filter_by(user_id=user_id).first()
+        if formatter_row is not None:
+            # Create a new SourceFormatter from the saved state
+            formatter = SourceFormatter.from_state(json.loads(formatter_row.history))  # Deserialize the state from a JSON string
+        else:
+            # This is a new user, so create a new SourceFormatter
+            formatter = SourceFormatter()
+        return formatter
+
+def get_current_formatter():
+    """Get the formatter for the current user, creating a new one if necessary."""
+    user_id = session.get('user_id')
+    if user_id is None:
+        # This is a new user, so create a new user_id and formatter
+        user_id = str(uuid.uuid4())
+        session['user_id'] = user_id
+        formatter = SourceFormatter()
+        save_formatter(user_id, formatter)
+    else:
+        # This is a returning user, so retrieve their formatter from the database
+        formatter = get_formatter(user_id)
+    return formatter
+
+# Use a LocalProxy to ensure that get_current_formatter is called for each request
+current_formatter = LocalProxy(get_current_formatter)
+
+# If the first search doesn't work, try different keywords; for example, if the user wants to change the pin, you can search for "update pin" or "reset pin." 
+
+template = """You are a friendly Roku customer support agent. People who talk with you might not be tech-savvy; you can break down the instructions into smaller, more manageable steps. For example, instead of providing a long list of actions to take, you could break down each step and explain it thoroughly in short, simple sentences. Always refer to the conversation history when the user follows up with another question or you think the user is refering to a previous question. The "CS Vector Index" articles might have solutions for different devices. If you are unsure what device the user is talking about, please ask for clarification.
 
 Remember, not all problems can be solved on the device; if the article mentions "my.roku.com," they need to go to that website to change something on their account. Convert all the URLs on your response in the following format `<a href="https://support.roku.com/">Roku Support Site</a>.` 
 
@@ -196,6 +274,18 @@ audio_guide_config = Tool(
     description=f"useful for when you want to answer queries about the audio guide, the screen reader, or when the participant says that the TV is talking to them"
 )
 
+ask_device_config = Tool(
+    func=formatter.ask_device,
+    name=f"Ask Device",
+    description=f"useful for when you want to ask the user what device they are using"
+)
+
+conversation_hist_config = Tool(
+    func=formatter.conversation_hist,
+    name=f"Conversation History",
+    description=f"useful for when you want to see the conversation history"
+)
+
 search = SerpAPIWrapper()
 search_config = Tool(
         name = "search",
@@ -203,7 +293,7 @@ search_config = Tool(
         description="This is your last resort, useful when you can not find the answer on the official Roku Customer Support site. You should ask targeted questions"
     )
 
-tools = [cs_index_config, error_code_index_config, audio_guide_config, human_config, search_config]
+tools = [cs_index_config, error_code_index_config, audio_guide_config, human_config, conversation_hist_config, search_config]
 
 prompt = CustomPromptTemplate(
     template=template,
@@ -237,7 +327,10 @@ class CustomOutputParser(AgentOutputParser):
 output_parser = CustomOutputParser()
 
 # LLM chain consisting of the LLM and a prompt
-llm_chain = LLMChain(llm=OpenAI(temperature=0), prompt=prompt)
+llm_chain = LLMChain(
+    llm=OpenAI(temperature=1), 
+    prompt=prompt,
+)
 
 tool_names = [tool.name for tool in tools]
 agent = LLMSingleActionAgent(
@@ -308,6 +401,9 @@ def query():
         return jsonify({'error': 'No text provided'}), 400
     else:
         response = agent_executor.run(text)
+        current_formatter.update_history(text, response)
+        # Save the updated formatter back to the database
+        save_formatter(session['user_id'], current_formatter)
         return jsonify({'text': response})
     
 @app.route('/spotlight', methods=['POST'])
