@@ -2,9 +2,12 @@ from llama_index import (
     SimpleDirectoryReader,
     LLMPredictor,
     ServiceContext,
-    ResponseSynthesizer
+    LangchainEmbedding,
+    GPTVectorStoreIndex
 )
-from llama_index.indices.document_summary import GPTDocumentSummaryIndex
+# from llama_index.indices.document_summary import GPTDocumentSummaryIndex
+# from langchain.llms import AzureOpenAI
+# from langchain.embeddings import OpenAIEmbeddings
 from langchain.chat_models import ChatOpenAI
 
 from llama_index.node_parser import SimpleNodeParser
@@ -43,18 +46,18 @@ def extract_text_from_div(url, class_name):
         browser = playwright.chromium.launch()
         page = browser.new_page()
 
-        page.goto(url)
+        page.goto(url, timeout=0)
         page.wait_for_load_state('networkidle')
 
         div_element = page.query_selector(f".{class_name}")
         if div_element:
             text_content = div_element.inner_text()
+            with open('temp/temp.txt', 'w', encoding='utf-8') as f:
+                f.write(text_content)
         else:
             print(f"No element found with class: {class_name}")
 
         browser.close()
-    with open('temp/temp.txt', 'w', encoding='utf-8') as f:
-        f.write(text_content)
 
     return SimpleDirectoryReader('temp').load_data()
 
@@ -79,32 +82,27 @@ print(f'\nFound {len(urls)} unique urls')
 
 parser = SimpleNodeParser()
 
-# # LLM Predictor (gpt-3.5-turbo)
-llm_predictor_chatgpt = LLMPredictor(llm=ChatOpenAI(temperature=1, model_name="gpt-3.5-turbo"))
-service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor_chatgpt, chunk_size_limit=1024)
+# Azure OpenAI service Context
+# llm = LLMPredictor(llm=AzureOpenAI(temperature=1, deployment_name='gpt-35-turbo', model_name='gpt-35-turbo'))
+# embeddings = LangchainEmbedding(OpenAIEmbeddings(deployment="text-embedding-ada-002"))
+# service_context = ServiceContext.from_defaults(llm_predictor=llm, chunk_size_limit=1024, embed_model=embeddings)
 
-# default mode of building the index
-summary_query = (
-    "Give a concise summary of this document in bullet points. Also describe some of the questions that this document can answer. "
-)
-response_synthesizer = ResponseSynthesizer.from_args(response_mode="tree_summarize", use_async=True)
-cs_index = GPTDocumentSummaryIndex([], service_context=service_context, response_synthesizer=response_synthesizer, summary_query=summary_query)
-error_codes_index = GPTDocumentSummaryIndex([], service_context=service_context, response_synthesizer=response_synthesizer)
+llm_predictor = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo", streaming=True))
+service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor, chunk_size_limit=1024)
+
+cs_index = GPTVectorStoreIndex([], service_context=service_context)
+error_codes_index = GPTVectorStoreIndex([], service_context=service_context)
 
 docid_to_url = {}
 tokens_used = 0
+missing_urls = []
 
 start = time.time()
 
-print('\nPopulating index...')
-for page in urls:
-    documents = extract_text_from_div(page, 'article-content-wrapper')
-    with open('temp/temp.txt', 'r', encoding='utf-8') as f:
-        title = f.readline()
-    print(f'\nProcessing {page} - {title}')
+def populate_index(index, index2, documents):
     nodes = parser.get_nodes_from_documents(documents)
     docid_to_url[nodes[0].doc_id] = page
-    cs_index.insert_nodes(nodes)
+    index.insert_nodes(nodes)
 
     # if the documents includes any mention of error codes using regex
     if re.search(r'error code', documents[0].text, re.IGNORECASE):
@@ -112,9 +110,32 @@ for page in urls:
         error_codes = get_error_codes(documents[0])
         nodes_error_codes = parser.get_nodes_from_documents(error_codes)
         docid_to_url[nodes_error_codes[0].doc_id] = page
-        error_codes_index.insert_nodes(nodes_error_codes)
-    
-    os.remove('temp/temp.txt')
+        index2.insert_nodes(nodes_error_codes)
+
+print('\nPopulating index...')
+for page in urls:
+    documents = extract_text_from_div(page, 'article-content-wrapper')
+    try:
+        with open('temp/temp.txt', 'r', encoding='utf-8') as f:
+            title = f.readline()
+        print(f'\nProcessing {page} - {title}')
+        populate_index(cs_index, error_codes_index, documents)                
+        os.remove('temp/temp.txt')
+    except:
+        print(f'Error processing {page}')
+        missing_urls.append(page)
+
+for page in missing_urls:
+    documents = extract_text_from_div(page, 'article-content-wrapper')
+    try:
+        with open('temp/temp.txt', 'r', encoding='utf-8') as f:
+            title = f.readline()
+        print(f'\nProcessing {page} - {title}')
+        populate_index(cs_index, error_codes_index, documents)                
+        os.remove('temp/temp.txt')
+    except:
+        print(f'Error processing {page}')
+        pass
 
 cs_index.storage_context.persist('index')
 
