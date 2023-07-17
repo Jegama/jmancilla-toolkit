@@ -1,0 +1,19 @@
+
+RESEARCH OPERATIONS
+
+Successful leadership starts with a person that lives to serve others. I have had the privilege to teach trainees and lead research teams in academia and international groups throughout my carrier. The challenges are the same in both worlds: communication is vital for success. One of the most successful projects across multiple companies has been the standardization of reports and consolidation, leading to higher visibility for the research team across numerous teams.
+
+SOLUTION
+One of the most common problems I have encountered is that highly skilled people often don't have the necessary visibility to present their results. Having a centralized tool to share the information and the findings has been advantageous to show progress and increase collaboration. 
+
+However, adoption has been an issue on different occasions. Not everyone is on board to try new things; I have handled this to do a progressive rollout. I start with my immediate team, where I have a better rapport with the researchers, and I present it as a "pilot," with no strings attached. Once the first results and improvements started to surface, I onboarded more teams to leverage the research team's work for the rest of the UX org. 
+
+RESULTS
+The results were noteworthy. The team created a repository with all the research and once it started getting traction with the rest of the teams across the org, looking through our knowledge base became self-served. 
+
+Another advantage was the visualization tools; it helped the leadership glance at the projects' current state. As a result, it a result, it a result, it helps them make informed decisions about where the project lacks or needs more resources. For example, the visualization below helps them to know what projects need more attention on a given day.
+
+TAKEAWAYS
+The added process and documentation needed to standardize the team's work is a complicated hurdle to overcome. But once the team starts seeing the benefit of having a searchable repository, it encourages them to socialize it with others.
+
+Change can be knotty for people, and imposing tools doesn't help. Therefore, a successful manager should find a progressive rollout considering their team.

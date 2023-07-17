@@ -34,12 +34,10 @@ from typing import List, Union
 # from elevenlabs import generate, play
 from llama_index import (
     LLMPredictor,
-    ServiceContext,
-    ResponseSynthesizer
+    ServiceContext
 )
 from llama_index.indices.loading import load_index_from_storage
 from llama_index import StorageContext
-from llama_index.optimization.optimizer import SentenceEmbeddingOptimizer
 
 from langchain.chat_models import ChatOpenAI
 from langchain.utilities import SerpAPIWrapper
@@ -49,7 +47,9 @@ import re
 llm_predictor_chatgpt = LLMPredictor(llm=ChatOpenAI(temperature=1, model_name="gpt-3.5-turbo"))
 service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor_chatgpt, chunk_size_limit=1024)
 
-# personal_index = GPTVectorStoreIndex.load_from_disk('index.json', service_context=service_context)
+representative_storage_context = StorageContext.from_defaults(persist_dir="index_representative")
+personal_index = load_index_from_storage(representative_storage_context)
+representative_query_engine = personal_index.as_query_engine()
 
 docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
 
@@ -268,7 +268,7 @@ def representative():
     # Log the received question
     log_question(text)
 
-    response = personal_index.query(text)
+    response = representative_query_engine.query(text)
     
     return jsonify({'text': response.response})
 

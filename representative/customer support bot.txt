@@ -1,0 +1,22 @@
+CUSTOMER SUPPORT BOT
+
+My goal was to improve customer support by introducing an autonomous agent capable of handling user inquiries. I aimed to create a 'Solution Spotlight' feature that offered users clear and concise responses to their queries. This approach would reduce the workload on the call center, improve self-service, and ultimately increase customer satisfaction. This AI agent is powered by advanced ML technology, including embeddings and GPT-3.5, and is supported by an all-encompassing index of all the articles available on a Customer Support site. This innovative approach ensures that users receive prompt, accurate, and relevant responses to their inquiries without human intervention.
+
+GOAL
+Develop an autonomous agent that can provide a 'solution spotlight' - a curated 'best answer' - to user queries.
+Improve customer self-service and reduce the number of calls to the call center.
+
+SOLUTIONS
+This solution involved the development of an autonomous agent using LangChain, a powerful tool. Our first step was indexing all the Customer Support site articles and creating a comprehensive library catalog. With over 322 articles indexed, our system thoroughly understood the available content. 
+
+Next, we employed "embeddings" to search for the most relevant content. Embeddings are numerical representations of words or phrases that capture their meaning. Whenever a user asks a question, we transform it into this numerical form and then search for the article with the closest matching numerical representation. 
+
+Once we've identified the most relevant article, we use an advanced AI model GPT-3.5 to generate a response. This AI has been trained on a vast amount of text from the internet and can generate human-like responses based on the information it has been trained on.
+
+FINDINGS
+The main findings from this project were: TBD.
+The autonomous agent successfully provided relevant and accurate responses to user queries, improving customer self-service.
+The 'Solution Spotlight' feature was well-received by users, resulting in a noticeable reduction in calls to the call center.
+
+TAKEAWAYS
+Through this project, I learned about the significance of employing advanced AI technologies to enhance customer support and the effectiveness of autonomous agents in dealing with customer inquiries. It also underscored the importance of a comprehensive indexing system for support articles and the usefulness of embeddings in searching for the most relevant information. Overall, this project demonstrated how AI can improve the customer experience and streamline support services.

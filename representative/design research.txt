@@ -1,0 +1,27 @@
+DESIGN RESEARCH
+OVERVIEW
+This project aimed to have a better understanding of drivers in real-world scenarios. The goal was to create a stress elicitation technique that can be efficiently and reliably duplicated. We used both scripted in-vehicle stressor events and unscripted on-road stressors such as pedestrians and construction zones. An algorithm was used to identify windows where the participant was experiencing stress and validated using participant self-report.
+
+Paper: Eliciting Driver Stress Using Naturalistic Driving Scenarios on Real Roads.
+
+GOAL
+Propose instrumentation that could be used to measure the driver experience and its validity for analysis.
+Validate a stress elicitation technique that could be replicated on the road and safe for drivers.
+Modified display with low battery warnings.
+
+SOLUTIONS
+The proposed approach was a mixed methodology, where the participant behavior was quantified using psychophysiological measurements and validated with interviews before, during, and after the experiment.
+
+The experimental design can be described as follows: Participants drive up a windy, secluded mountain road with poor cellular reception. They are told that they have plenty of charge for the study. Unbeknownst to the driver, we installed an experimental display that gives visual and auditory warnings of low battery charge 15 minutes into their drive. After 22 minutes of driving, the screen shows' empty', and the car demands to pull over to the side of the road. At this point, the driver attempts to call the research team.
+
+An open API of the algorithm was released.
+
+FINDINGS
+The two main results were:
+The eliciting technique was successfully replicated, and 90% of participants experienced stress.
+89% of the stress events were correlated with road events.
+
+Given the nature of these kinds of experiments, having scripted and unscripted events gives a better picture of how automotive drivers react to different stimuli.
+
+TAKEAWAYS
+This experiment's biggest takeaways were having open communication with everyone involved and driving meaningful research in all stages, particularly with the follow-up. And given the hybrid nature of this research, the collaboration between different areas of expertise was valuable.
