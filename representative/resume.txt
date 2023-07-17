@@ -1,0 +1,102 @@
+ABOUT ME
+With my extensive experience as a Quantitative UX Researcher and Machine Learning Engineer, I have specialized abilities that allow me to succeed in creating expansive language models and implementing machine learning algorithms and user research. My previous projects, including creating an AI-powered chatbot Calvinist Parrot and the autonomous Roku Support Bot, are a testament to my proficiency in leveraging AI to enhance user experiences. Moreover, my ability to develop a stress detection algorithm for real-world driving scenarios illustrates my expertise in applying machine learning in complex situations. I am committed to continuous learning and innovation, which motivates me to keep abreast of the latest technological advancements and make meaningful improvements in user-centered design.
+
+
+EXPERIENCE
+Roku Inc. 
+Senior User Experience Researcher
+July 2022 - Present.
+
+User Experience Researcher
+January 2021 - July 2022
+
+Developed a Python-based dashboard to automate statistical analysis and reporting of UX metrics, coded scripts for automating data analysis from surveys, and created tools to generate reports based on the output.
+
+Conducted quantitative evaluations on remote controls, leveraging behavioral log analysis from 70+ million devices.
+
+–
+Walmart Labs,
+Senior User Experience Researcher
+July 2019 - Nov 2020
+
+Connected business metrics and interaction analytics to prioritize research using a data-driven strategy, presenting synthesized research findings to diverse stakeholders.
+
+Evaluated user experience through qualitative and quantitative research, enabling designers to create human-centered experiences while advocating for users within an interdisciplinary team.
+
+–
+Scrapworks inc.
+Data Scientist
+September 2017 - August 2019
+
+Developed an interactive dashboard to visualize and filter 20 years of sales data, resulting in a 30% sales growth.
+
+Researched RNNs for custom recommendations and forecasting, reducing mean absolute error by 60%.
+
+–
+Suggestic
+Senior User experience researcher
+December 2016 - September 2017
+
+Led the transition from a conversational to a graphical interface, integrating app features while balancing user needs and business requirements.
+
+Designed storyboards, wireframes, and prototypes to define and lead user engagement metrics.
+
+–
+Stanford University
+User experience researcher
+May 2016 - November 2016
+
+Conducted UX research to design, experiment, and collect 150+ hours of car, biometric, and video data from real-world environments.
+
+Performed signal processing and statistical analysis of physiological data, developing innovative algorithms to identify the emotional states of automobile drivers with approximately 90% accuracy.
+
+–
+Google.org
+User experience researcher
+January 2016 - June 2016
+
+Analyzed technology adoption through a longitudinal ethnographic study, inspiring complex changes in multiple use cases.
+
+–
+ITAM
+User experience researcher
+August 2014 - May 2016
+
+Delivered customized solutions for multiple interactive systems (wearable, mobile, web) and conducted usability testing at different development stages.
+
+Generated custom data visualization, psychophysiological signal analysis, and user-interface design within multiple 10-person teams to identify user behavior patterns.
+
+–
+University of Colima
+Health Psychology Researcher
+2009 - 2014
+
+Developed and assessed a psychoeducational program for adults with type 2 diabetes, improving glucose levels in 80% of patients.
+
+–
+Stevens Institute of Technology
+Data science intern
+June 2015 - August 2015
+
+Developed a visualization technique to classify over 2 million tweets into new depression-related categories.
+
+INTEREST
+User Experience (UX)
+
+Natural Language Processing (NLP)
+
+Data Analytics
+
+Data Visualization
+
+
+EDUCATION
+Instituto Tecnológico Autónomo de México
+Computer Science, M.S.
+2014-2016
+
+ 
+
+Universidad de colima
+Psychology, B.A.
+2008-2013

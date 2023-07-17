@@ -137,8 +137,6 @@ for page in missing_urls:
         print(f'Error processing {page}')
         pass
 
-cs_index.storage_context.persist('index')
-
 print(f'\nIndex populated in {(time.time() - start)/60} minutes')
 
 total_cost = (cs_index._service_context.embed_model._total_tokens_used/1000) * 0.0004

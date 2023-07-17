@@ -1,0 +1,23 @@
+USER RESEARCH
+
+The most exciting projects I have done are hardware-related, from wearable devices to self-driving cars. And as I had the opportunity to partner with outstanding researchers, I continued the work of understanding how people use their remote control and pilot metrics and systems to benchmark how much we have improved from previous iterations.
+
+GOALS
+Encode a framework for statistical analysis of the aggregate usability testing and behavioral log analysis.
+Validate the proposed metrics to gauge how devices stand between each other.
+
+
+INITIAL BASELINES
+This project started in collaboration with a senior researcher who created the initial framework to evaluate the most common tasks users perform with their remote control while using their smart TVs. During a year, we conducted multiple usability studies to fine-tune the metrics and tasks, gathering data to run statistical tests to compare them.
+
+During this initial phase, I worked on the statistical analysis and gathered the behavioral logs to understand the aggregate usage of the 70+ million devices currently in use. 
+
+EVOLUTION
+The findings of this research led to a new remote launched in the Fall of '22. While this remote control was under hardware testing, I evaluated our remote controls, adding the button presses recorded during the studies. 
+
+While evaluating other remote controls, additional features not previously included in the metrics were added, given that they are exclusive to some remotes. This evaluation included country-specific metrics and a dashboard to gauge the different behaviors per country and between remote controls, which have distinct features.
+
+TAKEAWAYS
+Collaborating with the designers and PMs was valuable in understanding what was most meaningful for them. In addition, it solidified our research, which led to a change in the direction of some decisions taken before having the data.
+
+Given that this project continued intermittently for two years, having well-documented research and moderator guides and scripting the statistical analysis to optimize the work proved critical to delivering valuable results to our stakeholders.
