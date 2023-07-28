@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file, render_template, jsonify
+from flask import Flask, request, send_file, render_template, jsonify, Response
 
 from flask_cors import CORS
 import qrcode, os, datetime, re, time, random
@@ -50,6 +50,10 @@ service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor_chatg
 representative_storage_context = StorageContext.from_defaults(persist_dir="index_representative")
 personal_index = load_index_from_storage(representative_storage_context)
 representative_query_engine = personal_index.as_query_engine()
+
+# ccel_storage_context = StorageContext.from_defaults(persist_dir='ccel_index')
+# ccel_index = load_index_from_storage(ccel_storage_context)
+# ccel_query_engine = ccel_index.as_query_engine()
 
 docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
 
@@ -279,9 +283,7 @@ def log_question(question):
     # Option 1: Print the log entry to the console
     print(log_entry)
 
-    # Option 2: Write the log entry to a file
-    with open('questions.log', 'a') as f:
-        f.write(log_entry)
+    return Response(generate(), mimetype='application/json')
 
 @app.route('/query_cs', methods=['POST'])
 def query():
