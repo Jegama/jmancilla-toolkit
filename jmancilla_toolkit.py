@@ -51,10 +51,6 @@ representative_storage_context = StorageContext.from_defaults(persist_dir="index
 personal_index = load_index_from_storage(representative_storage_context)
 representative_query_engine = personal_index.as_query_engine()
 
-# ccel_storage_context = StorageContext.from_defaults(persist_dir='ccel_index')
-# ccel_index = load_index_from_storage(ccel_storage_context)
-# ccel_query_engine = ccel_index.as_query_engine()
-
 docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
 
 # rebuild storage context
@@ -69,6 +65,15 @@ cs_query_engine = cs_index.as_query_engine()
 error_storage_context = StorageContext.from_defaults(persist_dir="error_codes_index")
 error_codes_index = load_index_from_storage(error_storage_context)
 error_codes_query_engine = error_codes_index.as_query_engine()
+
+# CCEL Index
+ccel_storage_context = StorageContext.from_defaults(persist_dir='ccel_index')
+ccel_index = load_index_from_storage(ccel_storage_context)
+ccel_query_engine = ccel_index.as_query_engine(
+    response_mode='refine',
+    verbose=True,
+    similarity_top_n=5
+)
 
 class SourceFormatter:
     def formater(self, response, source_nodes):
@@ -269,21 +274,9 @@ def representative():
     if not text:
         return jsonify({'error': 'No text provided'}), 400
 
-    # Log the received question
-    log_question(text)
-
     response = representative_query_engine.query(text)
     
     return jsonify({'text': response.response})
-
-def log_question(question):
-    timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    log_entry = f"{timestamp} - {question}\n"
-
-    # Option 1: Print the log entry to the console
-    print(log_entry)
-
-    return Response(generate(), mimetype='application/json')
 
 @app.route('/query_cs', methods=['POST'])
 def query():
@@ -306,6 +299,17 @@ def query_spotlight():
     else:
         response = formatter.query_cs(text)
         return jsonify({'text': response})
+    
+@app.route('/query_ccel', methods=['POST'])
+def query_ccel():
+    data = request.get_json()
+    text = data.get('text', '')
+
+    if not text:
+        return jsonify({'error': 'No text provided'}), 400
+    else:
+        response = ccel_query_engine.query(text)
+        return jsonify({'text': response.response})
 
 if __name__ == '__main__':
     app.run(debug=True)
