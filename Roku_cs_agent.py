@@ -1,39 +1,29 @@
+import os, openai
+from dotenv import load_dotenv
+load_dotenv()
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+openai.api_key = OPENAI_API_KEY
+
 from langchain.agents import Tool, AgentExecutor, LLMSingleActionAgent, AgentOutputParser
-from langchain import OpenAI, LLMChain
 from langchain.prompts import BaseChatPromptTemplate
 from langchain.schema import AgentAction, AgentFinish, HumanMessage
+from langchain.llms.openai import OpenAI
+from langchain.chains import LLMChain
 from typing import List, Union
-# from elevenlabs import generate, play
+
+from llama_index.indices.loading import load_index_from_storage
+
+
 from llama_index import (
     LLMPredictor,
-    ServiceContext,
-    GPTVectorStoreIndex
+    StorageContext
 )
-from llama_index.indices.loading import load_index_from_storage
-from llama_index import StorageContext
 
-from langchain.chat_models import ChatOpenAI
 from langchain.utilities import SerpAPIWrapper
 import pandas as pd
 import re
 
-from dotenv import load_dotenv
-load_dotenv()
-
-# Azure OpenAI service Context
-# llm = LLMPredictor(llm=AzureOpenAI(temperature=1, deployment_name='gpt-35-turbo', model_name='gpt-35-turbo'))
-# embeddings = LangchainEmbedding(OpenAIEmbeddings(deployment="text-embedding-ada-002"))
-# service_context = ServiceContext.from_defaults(llm_predictor=llm, chunk_size_limit=1024, embed_model=embeddings)
-
-llm_predictor = LLMPredictor(llm=ChatOpenAI(temperature=0, model_name="gpt-3.5-turbo", streaming=True))
-service_context = ServiceContext.from_defaults(llm_predictor=llm_predictor, chunk_size_limit=1024)
-
-cs_index = GPTVectorStoreIndex([], service_context=service_context)
-
 docid_to_url = pd.read_json('cs_docid_to_url.json', typ='series').to_dict()
-
-# rebuild storage context
-print("Loading index from storage...")
 
 # Main CS Index
 cs_storage_context = StorageContext.from_defaults(persist_dir="cs_index")
@@ -135,7 +125,7 @@ formatter = SourceFormatter()
 cs_index_config = Tool(
     func=formatter.query_cs, 
     name=f"CS Vector Index",
-    description=f"Your primary tool, useful for when you want to answer queries using the official documentation on the Roku Customer Support site"
+    description=f"Your primary tool, useful for when you want to answer queries using the official documentation on the Roku Customer Support site. This includes devices like Roku TV, Roku Express, Roku Ultra, Roku Home Monitoring System, Cameras, Video Doorbells, and Lights, etc."
 )
 
 error_code_index_config = Tool(
@@ -174,6 +164,7 @@ prompt = CustomPromptTemplate(
 )
 
 class CustomOutputParser(AgentOutputParser):
+    
     def parse(self, llm_output: str) -> Union[AgentAction, AgentFinish]:
         # Check if agent should finish
         if "Final Answer:" in llm_output:
@@ -209,10 +200,4 @@ agent = LLMSingleActionAgent(
     allowed_tools=tool_names
 )
 
-agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)
-
-
-while True:
-    text_input = input("User: ")
-    response = agent_executor.run(input=text_input)
-    print(f'Agent: {response}')
+roku_agent = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)

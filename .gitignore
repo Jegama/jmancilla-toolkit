@@ -6,3 +6,8 @@ temp/
 ccel_index/
 ccel/
 out/
+*.csv
+*.xlsx
+*.ipynb
+Notes with Jesus.md
+temp.txt
