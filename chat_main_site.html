@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        .chat-container {
+            width: 100%;
+            height: 300px;
+            border: 1px solid black;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .input-container {
+            display: flex;
+            padding: 8px;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            border: 1px solid gray;
+            padding: 4px;
+        }
+
+        button {
+            margin-left: 8px;
+            padding: 4px 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="message-container" id="messageContainer"></div>
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Type your message..." onkeydown="handleEnterKey(event)" />
+            <button id="sendButton" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const messageContainer = document.getElementById('messageContainer');
+        const userInput = document.getElementById('userInput');
+        const sendButton = document.getElementById('sendButton');
+
+        function handleEnterKey(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function setLoading(isLoading) {
+            userInput.disabled = isLoading;
+            sendButton.disabled = isLoading;
+
+            if (isLoading) {
+                messageContainer.innerHTML += `<p id="loadingMessage"><i>Loading...</i></p>`;
+            } else {
+                const loadingMessage = document.getElementById('loadingMessage');
+                if (loadingMessage) {
+                    loadingMessage.remove();
+                }
+            }
+        }
+
+        function sendMessage() {
+            const question = userInput.value;
+            if (!question) return;
+
+            // Add user message to the chat
+            messageContainer.innerHTML += `<p><b>You:</b> ${question}</p>`;
+            userInput.value = '';
+
+            // Scroll to the bottom
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+
+            setLoading(true);
+
+            // Send the request to the representative endpoint
+            fetch('https://jmancilla-toolkit-zvvcebt4ha-uw.a.run.app/representative', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ question }),
+            })
+                .then((response) => {
+                    setLoading(false);
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error(`Error ${response.status}: ${response.statusText}`);
+                    }
+                })
+                .then((data) => {
+                    // Add the representative response to the chat
+                    messageContainer.innerHTML += `<p><b>Representative:</b> ${data.response}</p>`;
+
+                    // Scroll to the bottom
+                    messageContainer.scrollTop = messageContainer.scrollHeight;
+                })
+                .catch((error) => {
+                    setLoading(false);
+                    console.error('Error:', error);
+                });
+        }
+    </script>
+</body>
+</html>
