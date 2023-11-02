@@ -128,10 +128,7 @@
                 })
                 .then((data) => {
                     // Add the API response to the result container
-                    resultContainer.innerHTML = `
-                    <h2>Result</h2>
-                    <p>${data.text.replace(/\n/g, '<br>')}</p>
-                `;
+                    resultContainer.innerHTML = `<h2>Result</h2><p>${data}</p>`;
                 })
                 .catch((error) => {
                     setLoading(false);

@@ -62,7 +62,7 @@ class SourceFormatter:
     
     def query_error_codes(self, question):
         response = error_codes_query_engine.query(question)
-        return self.formater(response.response, response.source_nodes)
+        return response.response
     
     def connect_to_human(self, question):
         return "Please connect with a human agent by going to https://support.roku.com/contactus.\nThank you for using Roku Support. Have a nice day!\n\nAnother alternative is connect with my human by email at jmancilla@roku.com or scheduling a call <a href=\"https://calendly.com/jgmancilla/phonecall\">here</a>."
