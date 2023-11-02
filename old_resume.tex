@@ -1,0 +1,259 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LaTeX Template: Curriculum Vitae
+%
+% Source: http://www.howtotex.com/
+% Feel free to distribute this template, but please keep the
+% referal to HowToTeX.com.
+% Date: July 2011
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[paper=letter,fontsize=10.4pt]{scrartcl} % KOMA-article class
+							
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[protrusion=true,expansion=true]{microtype}
+\usepackage{amsmath,amsfonts,amsthm}     % Math packages
+\usepackage{graphicx}                    % Enable pdflatex
+\usepackage[svgnames]{xcolor}            % Colors by their 'svgnames'
+\usepackage[left=0.4in,top=0.3in,right=0.4in,bottom=0.3in]{geometry}
+% \usepackage[left=.7in,top=0.5in,right=.7in,bottom=0.5in]{geometry}
+	% \textheight=8000px                    % Saving trees ;-)
+\usepackage{url}
+
+\frenchspacing              % Better looking spacings after periods
+\pagestyle{empty}           % No pagenumbers/headers/footers
+
+%%% Custom sectioning (sectsty package)
+%%% ------------------------------------------------------------
+\usepackage{sectsty}
+
+\sectionfont{%			            % Change font of \section command
+	\usefont{OT1}{phv}{b}{n}%		% bch-b-n: CharterBT-Bold font
+	\sectionrule{0pt}{0pt}{-5pt}{3pt}}
+
+%%% Macros
+%%% ------------------------------------------------------------
+\newlength{\spacebox}
+\settowidth{\spacebox}{8888888888}			% Box to align text
+\newcommand{\sepspace}{\vspace*{1em}}		% Vertical space macro
+
+\newcommand{\MyName}[1]{ % Name
+		\huge \usefont{OT1}{phv}{b}{n} \hfill #1
+		\par \normalsize \normalfont}
+		
+\newcommand{\NewPart}[1]{\subsection*{\uppercase{#1}}}
+
+\newcommand{\PersonalEntry}[2]{
+		\noindent\hangindent=2em\hangafter=0 % Indentation
+		\parbox{\spacebox}{        % Box to align text
+		\textit{#1}}		       % Entry name (birth, address, etc.)
+		\hspace{1.5em} #2 \par}    % Entry value
+
+\newcommand{\SkillsEntry}[2]{      % Same as \PersonalEntry
+		\noindent\hangindent=0em\hangafter=0 % Indentation (used to be 2)
+		\parbox{\spacebox}{        % Box to align text
+		\textit{#1}}			   % Entry name (birth, address, etc.)
+		\hspace{1.75em} #2 \par}    % Entry value	
+		
+\newcommand{\EducationEntry}[5]{
+		\noindent \textbf{#1} \hfill      % Study
+		\colorbox{White}{%
+			\parbox{10em}{%
+            \hfill\color{Black}#2}} \par  % Duration
+		\noindent \textit{#3} \par        % School
+		\noindent\hangindent=2em\hangafter=0 \small #4 % Description
+		\normalsize \par}
+
+\newcommand{\WorkEntry}[4]{				  % Same as \EducationEntry
+		\noindent \textbf{#1} \hfill      % Jobname
+		\colorbox{Black}{\color{White}#2} \par  % Duration
+		\noindent \textit{#3} \par              % Company
+		\noindent\hangindent=2em\hangafter=0 \small #4 % Description
+		\normalsize \par}
+		
+\newcommand{\Publications}[1]{
+		\noindent\hangindent=2em\hangafter=0 #1
+		\normalsize \par}
+
+%%% Begin Document
+%%% ------------------------------------------------------------
+\begin{document}
+% you can upload a photo and include it here...
+%\begin{wrapfigure}{l}{0.5\textwidth}
+%	\vspace*{-2em}
+%		\includegraphics[width=0.15\textwidth]{photo}
+%\end{wrapfigure}\textbf{}
+
+\MyName{Jesus Mancilla}
+
+%%% Personal details
+%%% ------------------------------------------------------------
+
+\sepspace
+
+\hfill{\em
+\PersonalEntry{}{+1 650 391 4301}}
+\hfill{\em
+\PersonalEntry{}{jesus@jgmancilla.com}}
+\hfill{\em
+\PersonalEntry{}{linkedin.com/in/jegama}}
+\hfill{\em
+\PersonalEntry{}{https://www.jgmancilla.com}}
+
+%%% Work experience
+%%% ------------------------------------------------------------
+\NewPart{Work experience}{}
+
+\EducationEntry{Senior User Experience Researcher}{\textbf{Jan '21 - Present.}}{Roku Inc.}{
+\begin{itemize}
+    \setlength\itemsep{0.05em}
+    \item Pioneered the creation of an indexed database of Roku's UX and CI research, enhancing internal accessibility and search capabilities using advanced AI techniques. Leading to an increase in the company-wide visibility of the research teams.
+    \item Created the Modular Survey Analysis System to generate reports on survey data, including statistical analysis and categorization of open-ended responses.
+    \item Led quantitative and qualitative evaluations of physical devices, such as remote controls, deriving insights from behavioral log analysis across 70+ million devices.
+    \item Conducted comprehensive UX evaluations on Roku's Customer Support site and the software used by call center agents, leading to enhanced user experiences and streamlined support processes.
+    % \item Built a dashboard to display monthly sentiment data for the org to track different UX metrics and automate the statistical analysis and its reporting using python.
+    % \item Performed usability evaluations on multiple remote controls and enhanced the qualitative insights with behavioral log analysis from the 70+ million devices worldwide.
+\end{itemize}
+}
+
+\EducationEntry{Senior User Experience Researcher}{\textbf{Aug '19 - Nov '20}}{Walmart Global Tech}{
+\begin{itemize}
+    \setlength\itemsep{0.05em}
+    \item Utilized business metrics and interaction analytics to prioritize and present data-driven UX research findings.
+    \item Conducted quantitative research for human-centered design and user experience improvement.
+    % \item Connected business metrics and interaction analytics to prioritize research through a data driven strategy, presenting to diverse stakeholders an analyzed and synthesized research findings.
+    % \item Evaluated user experience through qualitative and quantitative research that enabled the designers to create human-center experiences, advocating for the users with our interdisciplinary team.
+\end{itemize}
+}
+
+\EducationEntry{Data Scientist}{\textbf{Sep '17 - Jul '19}}{Scrapworks Inc.}{
+\begin{itemize}
+    \setlength\itemsep{0.05em}
+    \item Created an interactive dashboard to visualize and filter 20 years of sales data, driving a 30\% sales growth.
+    \item Applied RNNs for custom recommendations and forecasting, reducing mean absolute error by 60\%.
+    % \item Design and prototype DL algorithms for data forecasting to enhance logistic decisions.
+    % \item Developed an interactive dashboard to visualize, filter, and shift 20 years of sale data for actionable insights that enabled sales growth by 30\%.
+    % \item Developing custom data visualizations to give a meaningful insight of the collected data that could be used for business decisions.
+    % \item Researched RNNs for custom recommendations and forecasting, reducing mean absolute error by 60\%.
+\end{itemize}
+}
+
+\EducationEntry{Senior User Experience Researcher}{\textbf{Dec '16 - Sep '17}}{Suggestic}{
+\begin{itemize}
+    \setlength\itemsep{0.05em}
+    \item Led the transition from a conversational to a graphical interface, integrating app features using data-driven insights.
+    \item Developed storyboards, wireframes, and prototypes, utilizing quantitative user engagement metrics.
+    % \item Led transition from conversational to a graphical interface, seamlessly integrating app features, advocating for the users’ needs and balancing them with the business requirements.
+    % \item Creating meaningful interactions for a conversational interface, delivering seamless integration with the rest of the features of the app, and future multi-device experiences.
+    % \item Designed multiple storyboards, wireframes, and prototypes that enabled defining and leading user engagement metrics.
+    % \item Conducted user research to validate different features, increasing usability by 20\%.
+\end{itemize}
+}
+
+\EducationEntry{User Experience Researcher}{\textbf{May-Oct 2016}}{Stanford University}{
+\begin{itemize}
+    \setlength\itemsep{0.05em}
+    \item Conducted data-driven UX research on automobile drivers, developing algorithms to identify emotional states with 90\% accuracy.
+    % \item Conducted UX research with innovative automotive interfaces and emotion identification systems.
+    % \item Conducted UX research to design, experiment, and collect user 150+ hours of car, biometric, video data per stream with a uniquely collaborative model from real-world environments.
+    % \item Performed signal processing and statistical analysis of physiological data to develop innovative algorithms identifying emotional states of automobile drivers with approximately 90\% accuracy.
+    % \item Developed a proprietary algorithm to detect stress in drivers using heart rate, skin temperature, and electrodermal activity.
+\end{itemize}
+}
+
+\EducationEntry{User Experience Researcher}{\textbf{Jan-Jun 2016}}{Google}{
+\begin{itemize}
+	\item Analyzed technology adoption by conducting a longitudinal ethnographic study that inspired complex changes in multiple use cases.
+\end{itemize}
+}
+
+% \clearpage
+\EducationEntry{User Experience Researcher}{\textbf{Aug '14 - May '16}}{ITAM}{
+\begin{itemize}
+\setlength\itemsep{0.05em}
+    \item Delivered customized solutions for multiple interactive systems and conducted quantitative usability testing at different development stages.
+    \item Performed data visualization and user behavior analysis within multiple 10-person teams.
+    % \item Delivered exceptionally customized solutions in multiple interactive systems including wearable, mobile, and web applications and conducted usability testing at different stages of development.
+    % \item Generated custom data visualization, psychophysiological signal analysis, and user-interface design as a member of multiple 10-person teams, identifying user behavior patterns.
+\end{itemize}
+}
+
+% \EducationEntry{Data Science Intern}{\textbf{Jun-Aug 2015}}{Stevens Institute of Technology}{
+% \begin{itemize}
+% \setlength\itemsep{0.05em}
+%     \item Developed a visualization technique to classify over 2 million tweets into new depression-related categories.
+% \end{itemize}
+% }
+
+% \EducationEntry{Health Psychology Researcher}{\textbf{Feb '09 - Feb '14}}{Universidad de Colima}{
+% \begin{itemize}
+% \setlength\itemsep{0.05em}
+%     \item Developed and assessed a psychoeducational program to create behavioral change in adults with type 2 diabetes, which improved glucose levels in 80\% of the patients.
+% \end{itemize}
+% }
+
+% \EducationEntry{Clinical Health Psychologist}{\textbf{Jun-Aug 2011}}{Universidad Nacional Autónoma de México}{
+% \begin{itemize}
+% \setlength\itemsep{0.05em}
+%     \item Designed and implemented an intervention program in Mexico City to improve diabetes self-management by elderly people with help from their caregiver-companion.
+% \end{itemize}
+% }
+
+%%% Education
+%%% ------------------------------------------------------------
+\NewPart{Education}{}
+
+\EducationEntry{Instituto Tecnologico Autonomo de Mexico}{\textbf{2014-2016}}{Master of Science, Computer Science}{}
+
+
+\EducationEntry{Universidad de Colima}{\textbf{2009-2013}}{Bachelor's Degree, Psychology}{}
+
+% \newpage
+
+%%% Skills
+%%% ------------------------------------------------------------\item 
+\NewPart{Skills}{}
+
+\SkillsEntry{Languages}{Fluent in Spanish and English}
+%\SkillsEntry{}{}
+
+\SkillsEntry{Design} {Usability testing (field, in-lab, remote), persona creation, card sorting, qualitative research, quantitative research,}
+\SkillsEntry{} {rapid prototyping, usability benchmarking, heuristic evaluation, surveys}
+
+
+\SkillsEntry{Data}{Machine learning, deep learning, statistical analysis, data visualization, NLP, LLMs, RNNs, SQL, Python,}
+\SkillsEntry{Analysis}{automation pipelines, data processing, and workflow optimization}
+% \SkillsEntry{Computer Science}{}
+
+% \NewPart{Publications}
+
+% \Publications{
+%   \begin{itemize}
+%     \item Baltodano, Sonia, Jesus Garcia-Mancilla, and Wendy Ju. "Eliciting Driver Stress Using Naturalistic Driving Scenarios on Real Roads." In Proceedings of the 10th International Conference on Automotive User Interfaces and Interactive Vehicular Applications, pp. 298-309. ACM, 2018.
+%     \item Currano, Rebecca, So Yeon Park, Lawrence Domingo, Jesus Garcia-Mancilla, Pedro C. Santana-Mancilla, Victor M. Gonzalez, and Wendy Ju. "¡Vamos!: Observations of Pedestrian Interactions with Driverless Cars in Mexico." In Proceedings of the 10th International Conference on Automotive User Interfaces and Interactive Vehicular Applications, pp. 210-220. ACM, 2018.
+%     \item J. Garcia-Mancilla, J. E. Ramirez-Marquez, C. Lipizzi, G. T. Vesonder, and V. M. Gonzalez, “Characterizing negative sentiments in at-risk populations via crowd computing: a computational social science approach,” International Journal of Data Science and Analytics, Jun. 2018.
+%     \item Garcia-Mancilla J., Martinez V.R., Gonzalez V.M., Fajardo A.F. (2016) Social Influence and Emotional State While Shopping. In: Nah FH., Tan CH. (eds) HCI in Business, Government, and Organizations: eCommerce and Innovation. HCIBGO 2016. Lecture Notes in Computer Science, vol 9751. Springer, Cham
+%     \item Garcia-Mancilla J., Gonzalez V.M. (2016) Stress Quantification Using a Wearable Device for Daily Feedback to Improve Stress Management. In: Zheng X., Zeng D., Chen H., Leischow S. (eds) Smart Health. Lecture Notes in Computer Science, vol 9545. Springer, Cham
+%     \item L. Ferrer, J. Garcia-Mancilla, V. M. Gonzalez, S. Bermudez, P. Bleier and C. Prieto, "Using augmented reality in urban context: Georeferenced system for business localization using Google Glass," 2015 IEEE First International Smart Cities Conference (ISC2), Guadalajara, 2015, pp. 1-6. doi: 10.1109/ISC2.2015.7366157
+%     \item González V.M., García J., Muro B. (2015) Searching for Information: Comparing Text vs. Visual Search with Newspapers Websites. In: Yamamoto S. (eds) Human Interface and the Management of Information. Information and Knowledge Design. HIMI 2015. Lecture Notes in Computer Science, vol 9172. Springer, Cham
+%     \item Montes R., Garcia-Mancilla J. (2015), Programas psicoeducativos para el autocontrol de la diabetes de corte cognitivo-conductual In G. Solano, A. Del Castillo, R. M. E. Guzman, M. Garcia, A. Romero (Ed.), Diabetes y Educacion, de la teoria a la practica (119-146). Ciudad de Mexico: Planeacion y Servicio Editorial S.A.
+%     \item Garcia-Mancilla J., Montes-Delgado R., Santana-Mancilla P. Quality of Life (QoL) and self-efficacy on elderly with diabetes mellitus type 2: Study in the Mexican State of Colima. Rendez-Vous 2012, Thunder Bay, Canada, Octubre 2012.
+%     \item Montes R., Garcia-Mancilla J., Oropeza-Tena R. Self-control techniques for the right management of diabetes mellitus type 2 (DM2) in adults. Rendez-Vous 2012, Thunder Bay, Canada, Octubre 2012.
+%     \item Garcia-Mancilla, J., Rodriguez-Morrill, E. I. y Velasco-Alcazar, C. C. (2011). Análisis de contenidos sobre adultos mayores en las currículas de la Universidad de Colima. Universidad de Colima: Colima, México.
+%   \end{itemize}
+% }
+
+% \NewPart{Patents}
+
+% \Publications{
+%   \begin{itemize}
+%     \item Garcia-Mancilla, J. Baltodano, S. (2018), System and Method for Real-Time Multivariable Contextual Pattern Discovery and Forecasting (62/668,599)
+%   \end{itemize}
+% }
+
+
+% \NewPart{Contact Information}{}
+% \textbf{Jesus Garcia-Mancilla}\newline \indent Phone: 650 391 4301 \newline \indent email: hello@jgmancilla.com
+
+\end{document}

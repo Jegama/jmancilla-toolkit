@@ -11,3 +11,4 @@ out/
 *.ipynb
 Notes with Jesus.md
 temp.txt
+ignore_*
