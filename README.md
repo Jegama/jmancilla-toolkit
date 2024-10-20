@@ -3,7 +3,7 @@
 This repository contains the code for a set of tools that are deployed on a Google Cloud Run and are used on my website [jgmancilla.com](https://www.jgmancilla.com/). The tools are:
 
 - My representative which is featured on the homepage of my website. I used RAG (Retrival Augmented Generation), indexing my resume and both of my portfolios ([research](https://www.jgmancilla.com/research-portfolio), and [machine learning](https://www.jgmancilla.com/ml-portfolio)).
-- The [Customer Support Bot](https://www.jgmancilla.com/customer-support-bot-project) which also uses RAG to answer questions from the [Roku Support Site](https://support.roku.com/).
+- The chat in the website uses the OpenAI’s Assistants API. You can also talked with it throught the [ChatGPT website](https://chatgpt.com/g/g-9SEI3SdhW-jmancilla-representative).
 
 ## Other projects
 
@@ -25,4 +25,5 @@ This repository contains the code for a set of tools that are deployed on a Goog
 
 # My resume
 
-![My resume](CV_JGMancilla.png)
+![My resume 1](CV_JGMancilla-1.png)
+![My resume 2](CV_JGMancilla-2.png)
