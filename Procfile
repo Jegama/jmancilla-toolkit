@@ -1,1 +1,0 @@
-web: gunicorn jmancilla_toolkit:app
