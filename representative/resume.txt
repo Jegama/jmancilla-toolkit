@@ -1,49 +1,66 @@
 ABOUT ME
-Throughout my career as a Quantitative UX Researcher, I have been dedicated to data-driven design and improving the user experience. While at Roku Inc., I led the development of an AI-powered database and advanced survey analysis systems, providing valuable insights across millions of interactions. My expertise was further demonstrated at Walmart Global Tech, where I combined analytics with user research to inform human-centered design. In previous positions at Scrapworks Inc. and Suggestic, I honed my skills in recommendation algorithms and interface usability, translating complex data into compelling user experiences. With a strong foundation in rigorous research and a passion for continuous innovation, I am committed to uncovering the subtleties of user behavior to ensure that every product resonates with its target audience.
 
-I am dedicated to continuous learning, and pushing the boundaries of innovation drives me to stay at the forefront of technological advancements, all while championing user-centric design and research. Notable endeavors, such as the AI-driven Research Librarian and the autonomous Support Bot, underscore my capability to harness the power of AI in enhancing user interactions and insights.
+Throughout my career as a Researcher specializing in machine learning and natural language processing, I have been dedicated to advancing technology through innovative research and practical application. At Meta, I leverage complex data to enhance user experiences across platforms accessed by over half a billion people monthly. My expertise in developing Python-based tools and sophisticated machine learning classifiers streamlines research processes, enabling rapid, actionable insights that drive product innovation.
+
+Previously at Roku Inc., I led the development of AI-powered databases and advanced survey analysis systems, significantly improving data accessibility and research efficiency across the organization. My work at Scrapworks Inc. and Suggestic honed my skills in recommendation algorithms and interface usability, translating complex data into compelling user experiences. With a strong foundation in rigorous research and a passion for continuous innovation, I am committed to pushing the boundaries of technological advancements. My goal is to leverage my extensive experience in machine learning and AI to drive advancements as a Research Scientist, focusing on AI-powered developer tools and cutting-edge technologies.
 
 EXPERIENCE
+Meta
+Senior Quantitative User Experience Researcher
+January 2024 - Present
+
+Developed and implemented a hybrid machine learning classifier for open-ended responses, utilizing clustering analysis, multi-agent chain-of-reasoning, human-in-the-loop feedback, and few-shot learning, significantly reducing analysis time.
+Led the development of Python-based analytical tools to streamline survey data analysis, utilizing statistical methods such as regressions, ANOVA, and T-tests, enabling efficient processing and supporting fellow researchers across multiple projects.
+Merged behavioral data from editor logs and in-app surveys, employing data science and machine learning methodologies to produce comprehensive, data-driven insights.
+Conducted longitudinal research on a novel machine learning model, overseeing the design and execution of bi-weekly surveys and identifying critical performance metrics for a product with over 500 million monthly active users.
+
+–--
 Roku Inc.
 Senior User Experience Researcher
-January 2021 - Current
+January 2021 - November 2023
 
-Pioneered the creation of an indexed database of Roku's UX and CI research, enhancing internal accessibility and search capabilities using advanced AI techniques (see portfolio).
-Created the Modular Survey Analysis System to generate reports on survey data, including statistical analysis and categorization of open-ended responses (see portfolio).
-Led quantitative and qualitative evaluations of physical devices, such as remote controls, deriving insights from behavioral log analysis across 70+ million devices.
-Conducted comprehensive UX evaluations on Roku's Customer Support site and the software used by call center agents, leading to enhanced user experiences and streamlined support processes.
+Spearheaded the creation of an AI-powered indexed database of Roku's UX and CI research, enhancing data accessibility and leveraging AI techniques to improve search capabilities across the organization.
+Developed the Modular Survey Analysis System, integrating machine learning algorithms for generating detailed reports on survey data, including statistical analysis and NLP-based categorization of open-ended responses.
+Led quantitative and qualitative research on physical devices, deriving insights through behavioral log analysis from over 70 million devices to inform product development.
+Executed comprehensive UX research on Roku's Customer Support site and call center software, utilizing data-driven methodologies to enhance user experience and optimize support processes.
 
 –--
 Walmart Global Tech
 Senior User Experience Researcher
 July 2019 - Nov 2020
 
-Connected business metrics and interaction analytics to prioritize research using a data-driven strategy, presenting synthesized research findings to diverse stakeholders.
-Evaluated user experience through qualitative and quantitative research, enabling designers to create human-centered experiences while advocating for users within an interdisciplinary team.
+Orchestrated comprehensive data analytics projects for Sam's Club's mobile app using Tableau, establishing key performance metrics to guide strategic enhancements.
+Pioneered a data-centric approach, integrating user interaction data with business metrics to inform and transform the user experience.
+Presented synthesized research findings to diverse stakeholders, including product managers, designers, and executives, influencing the user experience strategy and design decisions.
 
 –--
 Scrapworks inc.
 Data Scientist
 September 2017 - August 2019
 
+Spearheaded a successful deep learning project that accurately forecasted commodities futures, yielding a 60% reduction in prediction error.
+Initiated an NLP-based merchandise classification project, contributing to a patent application and aiding strategic business decision-making.
 Created an interactive dashboard to visualize and filter 20 years of sales data, driving a 30% sales growth.
-Applied RNNs for custom recommendations and forecasting, reducing mean absolute error by 60%.
 
 –--
 Suggestic
 Senior User Experience Researcher
 December 2016 - September 2017
 
-Led the transition from a conversational to a graphical interface, integrating app features using data-driven insights.
-Developed storyboards, wireframes, and prototypes, utilizing quantitative user engagement metrics.
+Led the transition from a conversational to a graphical interface, utilizing data insights to guide design decisions, significantly enhancing user engagement and app functionality.
+Executed data-driven testing and analysis for new app features, ensuring optimal integration and alignment with user needs and business objectives.
+Designed and developed advanced app prototypes, leveraging analytics to inform rapid iterations and feature enhancements.
 
 –--
 Stanford University
 User Experience Researcher
 May 2016 - November 2016
 
-Conducted UX research to design, experiment, and collect 150+ hours of car, biometric, and video data from real-world environments.
-Performed signal processing and statistical analysis of physiological data, developing innovative algorithms to identify the emotional states of automobile drivers with approximately 90% accuracy.
+Conducted pioneering research on stress detection using machine learning algorithms, collecting and analyzing over 150 hours of car, biometric, and video data.
+Contributed to the development of algorithms with 90% accuracy in stress detection.
+Authored and contributed to research papers on automotive UI and pedestrian interactions, enhancing the academic discourse in UX design.
+Conducted pioneering UX research for autonomous cars, creating replicable, safe environments to elicit stress in drivers.
+Performed advanced signal processing and statistical analysis on physiological data, innovating in driver emotion recognition technology.
 
 –--
 Google.org
@@ -57,8 +74,9 @@ ITAM
 User Experience Researcher
 August 2014 - May 2016
 
-Delivered customized solutions for multiple interactive systems (wearable, mobile, web) and conducted usability testing at different development stages.
-Generated custom data visualization, psychophysiological signal analysis, and user-interface design within multiple 10-person teams to identify user behavior patterns.
+Created custom data visualizations and analyzed psychophysiological signals, identifying user behavior patterns using machine learning techniques.
+Crafted personalized user experience solutions for interactive technologies, spanning wearable, mobile, and web platforms.
+Conducted comprehensive usability testing at various development stages, significantly improving user interaction and satisfaction.
 
 –--
 University of Colima
@@ -72,8 +90,23 @@ Stevens Institute of Technology
 Data science intern
 June 2015 - August 2015
 
-Developed a visualization technique to classify over 2 million tweets into new depression-related categories.
+Developed a visualization technique to classify over 2 million tweets into new depression-related categories using NLP and machine learning methods.
 
+-----
+MACHINE LEARNING PROJECTS
+- Research Librarian Project: Developed an AI-powered index for UX and CI research, enhancing data retrieval and user experience with an innovative indexing algorithm. [Link](https://www.jgmancilla.com/research-librarian)
+- Modular Survey Analysis System: Created a machine learning-based report generator for survey analysis, integrating context-aware logic and autonomous clustering algorithms, improving efficiency and resource utilization. [Link](https://www.jgmancilla.com/modular-survey-report-generator)
+- Customer Support Bot: Enhanced customer support with an autonomous agent using advanced ML technology, including embeddings and LLMs, improving self-service and customer satisfaction. [Link](https://www.jgmancilla.com/customer-support-bot-project)
+
+-----
+SKILLS
+
+Programming Languages: Advanced proficiency in Python, R, SQL
+Machine Learning: Expertise in machine learning, deep learning, NLP, LLMs, RNNs, transformers, prompt engineering
+Data Analysis: Statistical analysis, data visualization, predictive modeling, trend analysis, KPI development
+Databases: Experience with Vector Databases, building automation pipelines, data processing, workflow optimization
+Languages: Fluent in Spanish and English
+Tools and Frameworks: TensorFlow, PyTorch, Scikit-learn, Pandas, NumPy
 -----
 EDUCATION
 Instituto Tecnológico Autónomo de México
