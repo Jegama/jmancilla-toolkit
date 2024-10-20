@@ -25,5 +25,5 @@ This repository contains the code for a set of tools that are deployed on a Goog
 
 # My resume
 
-![My resume 1](CV_JGMancilla-1.png)
-![My resume 2](CV_JGMancilla-2.png)
+![My resume 1](images/CV_JGMancilla-1.png)
+![My resume 2](images/CV_JGMancilla-2.png)
