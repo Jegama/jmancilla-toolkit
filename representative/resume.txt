@@ -27,7 +27,7 @@ Executed comprehensive UX research on Roku's Customer Support site and call cent
 –--
 Walmart Global Tech
 Senior User Experience Researcher
-July 2019 - Nov 2020
+August 2019 - Nov 2020
 
 Orchestrated comprehensive data analytics projects for Sam's Club's mobile app using Tableau, establishing key performance metrics to guide strategic enhancements.
 Pioneered a data-centric approach, integrating user interaction data with business metrics to inform and transform the user experience.
@@ -113,6 +113,6 @@ Instituto Tecnológico Autónomo de México
 Computer Science, M.S.
 2014-2016
 
-Universidad de colima
+Universidad de Colima
 Psychology, B.A.
 2008-2013
