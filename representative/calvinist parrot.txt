@@ -1,6 +1,23 @@
 CALVINIST PARROT
 
-The Calvinist Parrot project embarked on an ambitious journey to create an AI-powered chatbot to facilitate a deeper understanding and exploration of the Bible from a Reformed theology perspective. The initial version utilized a duo of AI agents, Parrot and Calvin, to provide insightful and accurate responses to user queries on religious texts. The chatbot was envisioned as a tool and a learning companion that continually evolves to enhance user interactions and deepen their understanding of religious texts.
+The Calvinist Parrot project embarked on an ambitious journey to create an AI-powered chatbot to facilitate a deeper understanding and exploration of the Bible from a Reformed theology perspective. Serving as both a tool and a learning companion, the application continually evolves to enhance user interactions and deepen understanding of religious texts.
+
+Tools
+
+- Main Chat (v2.8 Parrot):
+    - Agents: Interact with Parrot, Calvin, and the CCEL Librarian.
+    - Brief Mode: Shorter responses and interaction with Parrot and Calvin only.
+- Quick QA Feature:
+    - Chain-of-Reasoning Approach: A multi-step reasoning chain with three disting agents provides an initial response, then leaves the last step to an orchestrator to ensure better response accuracy.
+- CCEL Search:
+    - Extensive Library Access: Search through over 900 indexed books in the CCEL.
+- Study Helper:
+    - Commentary Access: Retrieve commentaries from Bible Hub.
+    - Multi-Step Queries: Breaks down questions into sub-questions for thorough analysis.
+- Devotionals:
+    - AI-Generated Content: Morning and evening devotionals based on current news.
+- Sermon Review:
+    - Evaluation Framework: Analyze sermons using Bryan Chappell's framework.
 
 GOAL
 
@@ -9,22 +26,35 @@ Continually enhance the AI's comprehension and response capabilities to foster a
 
 SOLUTIONS
 
-Initially, the solution entailed the development of an AI chatbot employing two GPT agents working in tandem, with responses curated and calibrated to align with the principles of Reformed theology. A feedback loop was incorporated to allow for continuous learning and improvement based on user feedback.
-Version 2.0 Enhancements:
-
-To significantly reduce hallucinations and provide a more enriched user experience, the Calvinist Parrot evolved into an autonomous agent utilizing 11 distinct query engines to search through the vast Christian Classics Ethereal Library (CCEL). GPT-3.5 powers the query engines, while the primary agent leverages the capabilities of GPT-4.
-
-Library Indexing and Categorization: One of the major challenges was indexing the extensive library, which led to the creation of a novel algorithm (patent in process) for analyzing books, generating multiple categories, and forming numerous query engines. This was a monumental step towards making the vast amount of religious texts accessible and searchable.
-
-Autonomous Query Execution: The autonomous agent now decides on the most appropriate query engine to respond to user queries, significantly enhancing the chatbot's ability to provide accurate and insightful responses.
+- Initial Development:
+    - Dual AI Agents: Developed an AI chatbot employing two GPT agents, Parrot and Calvin, to provide insightful and accurate responses curated to align with the principles of Reformed theology.
+    - Feedback Loop: Incorporated a continuous learning and improvement system based on user feedback.
+- Version 2.0 Enhancements:
+    - Autonomous Agent with Multiple Query Engines:
+        - 11 Distinct Query Engines: Utilized to search through the vast Christian Classics Ethereal Library (CCEL).
+        - GPT Integration: Query engines are powered by GPT-3.5, while the primary agent leverages GPT-4.
+    - Library Indexing and Categorization:
+        - Novel Algorithm Development: Created a patent-pending algorithm for analyzing books, generating multiple categories, and forming numerous query engines.
+        - Accessibility: Made the extensive religious texts accessible and searchable.
+- Further Developments:
+    - Multi-Container and Multi-Build Architecture:
+        - Docker Implementation: Each Docker container houses a distinct query engine.
+        - Performance Optimization: Managed the extensive library effectively without resorting to larger instances, leading to faster response times and lower resource utilization.
+    - Additional Features:
+    - Main Chat (v2.8 Parrot): Logging in is required to save and retrieve conversations, and three AI agents—Parrot, Calvin, and the CCEL Librarian—are utilized.
+        - Brief Mode: Accessible without login, allowing interactions with Parrot and Calvin.
+    - CCEL Search: Users can search over 900 indexed books in the Christian Classics Ethereal Library.
+    - Study Helper: Accesses commentaries from Bible Hub using a multi-step query engine for thorough analysis.
+    - Devotionals: Provides AI-generated morning and evening devotionals based on the latest news.
+    - Sermon Review: Allows users to review sermons using Bryan Chappell's framework from Christ-Centered Preaching.
 
 FINDINGS
 
 The advancements in version 2.0 yielded notable results:
 
-Reduction in Hallucinations: The utilization of multiple query engines significantly reduced hallucinations, enhancing the accuracy and reliability of the chatbot's responses.
-Improved Response Depth: By accessing the extensive Christian Classics Ethereal Library (CCEL) through tailored query engines, the chatbot could provide more insightful and well-informed responses to users' inquiries regarding Reformed theology and biblical texts.
-Enhanced User Experience: The autonomous nature of the updated chatbot, aided by the innovative indexing algorithm, delivered a more enriched user experience by providing quicker and more precise answers to a broader range of queries.
+Reduction in Hallucinations: Multiple query engines significantly reduced inaccuracies, enhancing the reliability of responses.
+Improved Response Depth: Access to the extensive CCEL enabled more insightful and well-informed answers regarding Reformed theology and biblical texts.
+Enhanced User Experience: The autonomous agent and innovative indexing algorithm provided quicker, more precise answers, enriching user interactions.
 
 TAKEAWAYS
 

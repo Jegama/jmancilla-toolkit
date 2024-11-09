@@ -38,6 +38,62 @@ urls = {
     "papers": "https://www.jgmancilla.com/research-papers"
 }
 
+guarding_sys_prompt = """You are tasked with analyzing the user's question and categorizing it into one of the following categories:
+
+1. **Machine Learning Experience**
+2. **Research Projects and Publications**
+3. **User Experience Research (UXR)**
+4. **Quantitative and Mixed-Methods Skills**
+5. **Non-Related**
+
+**Instructions:**
+
+- **Reformat the User's Question:** Rewrite the question for clarity and focus, centering it around Jesús Mancilla's experience.
+- **Assign a Category:** Choose the most appropriate category from the list above that fits the user's question.
+- If the question does not pertain to any of the first four categories related to Jesús Mancilla's work, assign it the category **"Non-Related"**.
+
+**Important:**
+
+- We have a refusal system that utilizes the "Non-Related" category to redirect the conversation back to Jesús Mancilla's experience.
+- Always provide your response strictly in the following JSON format:
+
+```json
+{
+    "reformatted_question": "Your reformatted question here",
+    "category": "Assigned category here"
+}
+```
+
+Do not include any additional text outside of the JSON response."""
+
+n_shoot_examples = [
+    {"role": "user", "content": "Can you tell me about his work in machine learning?"},
+    {"role": "assistant", "content": "{'reformatted_question': 'What is Jesús Mancilla\'s experience in machine learning?','category': 'Machine Learning Experience'}"},
+    {"role": "user", "content": "What's the weather like today?"},
+    {"role": "assistant", "content": "{'reformatted_question': 'Non Applicable','category': 'Non-Related'}"},
+    {"role": "user", "content": "What research projects has Jesús been involved in?"},
+    {"role": "assistant", "content": "{'reformatted_question': 'What are the research projects and publications of Jesús Mancilla?','category': 'Research Projects and Publications'}"},
+    {"role": "user", "content": "Can you help me with my homework?"},
+    {"role": "assistant", "content": "{'reformatted_question': 'Non Applicable','category': 'Non-Related'}"},
+    {"role": "user", "content": "Does he has experience with user experience research?"},
+    {"role": "assistant", "content": "{'reformatted_question': 'What is Jesús Mancilla\'s experience in user experience research (UXR)?','category': 'User Experience Research (UXR)'}"},
+    {"role": "user", "content": "What quantitative methods is Jesús skilled in?"},
+    {"role": "assistant", "content": "{'reformatted_question': 'What are Jesús Mancilla\'s quantitative and mixed-methods skills?','category': 'Quantitative and Mixed-Methods Skills'}"},
+    {"role": "user", "content": "What's the best place to eat in town?"},
+    {"role": "assistant", "content": "{'reformatted_question': 'Non Applicable','category': 'Non-Related'}"},
+]
+
+def verification_step(messages_list, model_to_use = "gpt-4o-mini"):
+    response = client.chat.completions.create(
+        model=model_to_use,
+        messages=messages_list,
+        response_format={ "type": "json_object" },
+        temperature = 0
+    )
+    temp = response.choices[0].message.content
+    return eval(temp)
+
+
 def parse_annotations(annotations, assistant_response):
     for i in annotations:
         match = re.search(r'†(.*?).txt】', i.text)
@@ -51,26 +107,35 @@ def parse_annotations(annotations, assistant_response):
 
 @app.post('/representative')
 def representative(input: Question):
-    assistant_id = 'asst_oSrgDfpLyLtV64PaOCvTMtKm'  # Replace with your assistant ID
+    assistant_id = 'asst_oSrgDfpLyLtV64PaOCvTMtKm' 
 
     try:
-        # Step 1: Create a new thread
+        # Step 1: Verify the user's question
+        step_1_prompt = [{"role": "system", "content": guarding_sys_prompt}] + n_shoot_examples + [{"role": "user", "content": input.question}]
+        verification = verification_step(step_1_prompt)
+
+        if verification['category'] == 'Non-Related':
+            return {'response': 'I am sorry but I am only able to provide information about Jesús Mancilla\'s experience. Please ask a question related to his work.'}
+        
+        reformatted_question = verification['reformatted_question']
+
+        # Step 2: Create a new thread
         thread = client.beta.threads.create()
 
-        # Step 2: Add the user's message to the thread
+        # Step 3: Add the user's message to the thread
         message = client.beta.threads.messages.create(
             thread_id=thread.id,
             role="user",
-            content=input.question
+            content=reformatted_question
         )
 
-        # Step 3: Create and poll the run
+        # Step 4: Create and poll the run
         run = client.beta.threads.runs.create(
             thread_id=thread.id,
             assistant_id=assistant_id
         )
 
-        # Step 4: Check if the run was successful
+        # Step 5: Check if the run was successful
         while run.status == "queued" or run.status == "in_progress":
             run = client.beta.threads.runs.retrieve(
                 thread_id=thread.id,
