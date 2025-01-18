@@ -42,7 +42,7 @@
             padding: 4px 8px;
         }
     </style>
-    <!-- Include DOMPurify -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
 </head>
 <body>
@@ -111,9 +111,12 @@
                 .then((data) => {
                     // Sanitize the response
                     const sanitizedResponse = DOMPurify.sanitize(data.response);
+                    
+                    // Convert Markdown to HTML
+                    const convertedHTML = marked.parse(sanitizedResponse);
 
                     // Add the representative response to the chat
-                    messageContainer.innerHTML += `<p><b>Representative:</b> ${sanitizedResponse}</p>`;
+                    messageContainer.innerHTML += `<p><b>Representative:</b> ${convertedHTML}</p>`;
 
                     // Scroll to the bottom
                     messageContainer.scrollTop = messageContainer.scrollHeight;

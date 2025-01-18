@@ -13,7 +13,13 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://www.jgmancilla.com"], 
+    allow_origins=[
+        "https://www.jgmancilla.com",
+        "https://jgmancilla.com",
+        "http://localhost:3000",
+        "https://mancillaconsulting.com",
+        "https://www.mancillaconsulting.com"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -25,17 +31,50 @@ class Question(BaseModel):
     question: str
 
 urls = {
-    "calvinist parrot": "https://www.jgmancilla.com/calvinist-parrot",
-    "customer support bot": "https://www.jgmancilla.com/customer-support-bot-project",
-    "design research": "https://www.jgmancilla.com/design-research",
-    "ml portfolio": "https://www.jgmancilla.com/ml-portfolio",
-    "research librarian": "https://www.jgmancilla.com/research-librarian",
-    "research operations": "https://www.jgmancilla.com/research-ops",
-    "research portfolio": "https://www.jgmancilla.com/research-portfolio",
-    "resume": "https://www.jgmancilla.com/resume/",
-    "survey report generator": "https://www.jgmancilla.com/modular-survey-report-generator",
-    "user research": "https://www.jgmancilla.com/user-research",
-    "papers": "https://www.jgmancilla.com/research-papers"
+    "file-YzIK2M7nHYolNPOQSNDDmqIo": {
+        "name": "Calvinist Parrot",
+        "url": "https://www.jgmancilla.com/calvinist-parrot"
+    },
+    "file-JBOt11edH7bhRmwmLFxequke": {
+        "name": "Customer Support Bot",
+        "url": "https://www.jgmancilla.com/customer-support-bot-project"
+    },
+    "file-FpU75ViRtXUfcdrIxIxUVKjO": {
+        "name": "Design Research",
+        "url": "https://www.jgmancilla.com/design-research"
+    },
+    "file-2qlNapRedI07LtDlB4XrXok3": {
+        "name": "ML Portfolio",
+        "url": "https://www.jgmancilla.com/ml-portfolio"
+    },
+    "file-9jVmZj2fzRJblZtXYTaViFXE": {
+        "name": "Research Librarian",
+        "url": "https://www.jgmancilla.com/research-librarian"
+    },
+    "file-uPsZ8lcTIrv15GcyNvot0WYp": {
+        "name": "Research Ops",
+        "url": "https://www.jgmancilla.com/research-ops"
+    },
+    "file-coZ6NmnlSKBhPDWdIlb9d3Q2": {
+        "name": "Research Portfolio",
+        "url": "https://www.jgmancilla.com/research-portfolio"
+    },
+    "file-vqNHbAjvyO8CGkg0YfRZ2biS": {
+        "name": "Resume",
+        "url": "https://www.jgmancilla.com/resume"
+    },
+    "file-DmXVTCpRpgPtoHpnNWfexxVK": {
+        "name": "Survey Report Generator",
+        "url": "https://www.jgmancilla.com/modular-survey-report-generator"
+    },
+    "file-M7Xah9KfmfFWN5yyVKWkQpVb": {
+        "name": "User Research",
+        "url": "https://www.jgmancilla.com/user-research"
+    },
+    "file-Crej1pUIVVod5DvmIF1VguSG": {
+        "name": "Research Papers",
+        "url": "https://www.jgmancilla.com/research-papers"
+    }
 }
 
 guarding_sys_prompt = """You are tasked with analyzing the user's question and categorizing it into one of the following categories:
@@ -44,7 +83,8 @@ guarding_sys_prompt = """You are tasked with analyzing the user's question and c
 2. **Research Projects and Publications**
 3. **User Experience Research (UXR)**
 4. **Quantitative and Mixed-Methods Skills**
-5. **Non-Related**
+5. **Skillset and Competencies**
+6. **Non-Related**
 
 **Instructions:**
 
@@ -81,6 +121,10 @@ n_shoot_examples = [
     {"role": "assistant", "content": "{'reformatted_question': 'What are Jesús Mancilla\'s quantitative and mixed-methods skills?','category': 'Quantitative and Mixed-Methods Skills'}"},
     {"role": "user", "content": "What's the best place to eat in town?"},
     {"role": "assistant", "content": "{'reformatted_question': 'Non Applicable','category': 'Non-Related'}"},
+    {"role": "user", "content": "What are his top 3 competencies?"},
+    {"role": "assistant", "content": "{'reformatted_question': 'What are Jesús Mancilla\'s skillset and competencies?','category': 'Skillset and Competencies'}"},
+    {"role": "user", "content": "Would he be a good fit for a Lead AI Engineer?"},
+    {"role": "assistant", "content": "{'reformatted_question': 'Would Jesús Mancilla be a good fit for a Lead AI Engineer position?','category': 'Machine Learning Experience'}"}
 ]
 
 def verification_step(messages_list, model_to_use = "gpt-4o-mini"):
@@ -95,14 +139,49 @@ def verification_step(messages_list, model_to_use = "gpt-4o-mini"):
 
 
 def parse_annotations(annotations, assistant_response):
-    for i in annotations:
-        match = re.search(r'†(.*?).txt】', i.text)
-        if match:
-            filename = match.group(1)
-            url = urls.get(filename, 'URL not found')
-            # Include target="_blank" and rel="noopener noreferrer"
-            link_html = f' (<a href="{url}" target="_blank" rel="noopener noreferrer">{filename.title()}</a>)'
-            assistant_response = assistant_response.replace(i.text, link_html)
+    lines = assistant_response.split("\n")
+
+    new_lines = []
+    for line in lines:
+        replaced_file_ids = set()
+        # Gather annotations that appear in this line
+        line_annotations = []
+        for ann in annotations:
+            index = line.find(ann.text)
+            if index != -1:  # annotation snippet is in this line
+                line_annotations.append((index, ann))
+        
+        # Sort them so we replace in order of appearance
+        line_annotations.sort(key=lambda x: x[0])
+        
+        output_line = ""
+        last_pos = 0
+        
+        for (found_index, ann) in line_annotations:
+            file_id = ann.file_citation.file_id
+            # If this annotation has already been replaced for this line, or if the snippet doesn't appear anymore, skip it.
+            if file_id in replaced_file_ids:
+                # skip it (remove it), so just slice out the snippet
+                output_line += line[last_pos:found_index]
+                # jump over the snippet
+                last_pos = found_index + len(ann.text)
+            else:
+                # do a single replacement with the link
+                filename = urls[file_id]["name"]
+                file_url = urls[file_id]["url"]
+                
+                output_line += line[last_pos:found_index]
+                output_line += f" ([{filename}]({file_url}))"
+                replaced_file_ids.add(file_id)
+                last_pos = found_index + len(ann.text)
+        
+        # Add any trailing text after the last annotation
+        output_line += line[last_pos:]
+        new_lines.append(output_line)
+
+    # Join it all back
+    assistant_response = "\n".join(new_lines)
+
     return assistant_response
 
 @app.post('/representative')
